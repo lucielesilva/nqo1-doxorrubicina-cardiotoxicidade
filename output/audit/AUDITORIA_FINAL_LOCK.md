@@ -1,12 +1,12 @@
-# 🔒 AUDITORIA CIENTÍFICA FORENSE DEFINITIVA — LOCK FINAL
+# 🔒 AUDITORIA CIENTÍFICA FORENSE DEFINITIVA, LOCK FINAL
 
 **Manuscrito auditado:** `resumo_expandido_luciele_cardiologia_2026_CORRIGIDO.docx`
 **Data:** 2026-06-26
-**Versão do script:** script.R (corrigido, NÃO re-executado — outputs refletem versão anterior)
+**Versão do script:** script.R (corrigido, NÃO re-executado, outputs refletem versão anterior)
 
 ---
 
-## ETAPA 1 — RECONSTRUÇÃO DO PIPELINE
+## ETAPA 1, RECONSTRUÇÃO DO PIPELINE
 
 ```
 DGB_results_NQO1.xlsx (6 abas: cmap/l1000/creeds × up/down)
@@ -38,35 +38,35 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 2 — AUDITORIA DO CÓDIGO (LINHA POR LINHA)
+## ETAPA 2, AUDITORIA DO CÓDIGO (LINHA POR LINHA)
 
 | # | Linha/Função | Problema | Gravidade |
 |---|-------------|----------|-----------|
 | 1 | `decimal_to_numeric` | Remove TODOS os pontos antes de converter vírgula. Se formato for "1.234.567,89" funciona, mas se for "1,234.56" (US), falha silenciosamente. Frágil. | BAIXA |
 | 2 | `extract_dose_um` | Regex `\d+(?:\.\d+)?` espera ponto decimal. Depende de `str_replace_all(dose, ",", ".")` aplicado antes. OK, mas ordem frágil. | BAIXA |
 | 3 | `read_nqo1_xlsx` | `expected_direction` calculado mas **nunca usado**. Código morto. | BAIXA |
-| 4 | `rank_nqo1_drugs` | `score = max(score, na.rm = TRUE)` — usa o score MÁXIMO entre registros, não o score do efeito agregado. O paper descreve fórmula diferente. ⚠️ | ALTA |
-| 5 | `rank_nqo1_drugs` | `direction = f(median_fc)` — OK, mas manumycin-a: mean_fc=-0,010, median_fc=+0,746. Contradição não sinalizada no código. | MÉDIA |
+| 4 | `rank_nqo1_drugs` | `score = max(score, na.rm = TRUE)`, usa o score MÁXIMO entre registros, não o score do efeito agregado. O paper descreve fórmula diferente. ⚠️ | ALTA |
+| 5 | `rank_nqo1_drugs` | `direction = f(median_fc)`, OK, mas manumycin-a: mean_fc=-0,010, median_fc=+0,746. Contradição não sinalizada no código. | MÉDIA |
 | 6 | `plot_dose_response` | Fallback quando `n_doses < 2` para todos os fármacos funciona, mas nunca foi testado (sempre há ≥1 fármaco com ≥2 doses). | BAIXA |
-| 7 | `main()` | O filtro `doxo` usa `str_detect(Drug_Name_Norm, "doxo|...")` — OK, mas depende do script ser re-executado para ter `Drug_Name_Norm` no ranking. | MÉDIA |
+| 7 | `main()` | O filtro `doxo` usa `str_detect(Drug_Name_Norm, "doxo|...")`, OK, mas depende do script ser re-executado para ter `Drug_Name_Norm` no ranking. | MÉDIA |
 | 8 | `main()` | Tabela 1 do paper (contagens por plataforma) **não é gerada pelo script**. O script não produz esta tabela. | ALTA |
 | 9 | `cleanup_unneeded_outputs` | Lista hardcoded de arquivos. Se arquivos forem renomeados, a limpeza falha silenciosamente. | BAIXA |
-| 10 | `AUDIT_EVENTS` | Cresce com `rbind()` — O(n²). Com ~15 eventos, irrelevante. | BAIXA |
+| 10 | `AUDIT_EVENTS` | Cresce com `rbind()`, O(n²). Com ~15 eventos, irrelevante. | BAIXA |
 
 ---
 
-## ETAPA 3 — REPRODUÇÃO MENTAL DAS TABELAS
+## ETAPA 3, REPRODUÇÃO MENTAL DAS TABELAS
 
 ### Tabela 1 do manuscrito (Distribuição por plataforma)
 
 | Claim no paper | Dado real (não-unificado, CSV atual) | Dado real (unificado, pós-script corrigido) | Status |
 |---------------|--------------------------------------|---------------------------------------------|--------|
-| LINCS: 1199 (94,7%) | 1199 entradas no ranking | 1206 fármacos únicos (95,3%) | 🔴 **ERRADO** — usa contagem não-unificada |
+| LINCS: 1199 (94,7%) | 1199 entradas no ranking | 1206 fármacos únicos (95,3%) | 🔴 **ERRADO**, usa contagem não-unificada |
 | CREEDS: 68 (5,4%) | 68 entradas | 68 fármacos (5,4%) | ✅ Coincide |
-| CMAP: 7 (0,6%) | 7 entradas | 14 fármacos (1,1%) | 🔴 **ERRADO** — 7 são entradas não-unificadas |
-| Multi-plataforma: 7 (0,6%) | 7 (CMAP+LINCS apenas) | **21** (14 CREEDS+LINCS, 6 CMAP+LINCS, 1 todos) | 🔴 **ERRADO** — 7 é apenas CMAP+LINCS |
-| Down: 676 (53,4%) | 676 entradas não-unificadas | **668** (52,8%) | 🔴 **ERRADO** — 676+605=1281≠1266 |
-| Up: 605 (47,8%) | 605 entradas não-unificadas | **598** (47,2%) | 🔴 **ERRADO** — mesmo problema |
+| CMAP: 7 (0,6%) | 7 entradas | 14 fármacos (1,1%) | 🔴 **ERRADO**, 7 são entradas não-unificadas |
+| Multi-plataforma: 7 (0,6%) | 7 (CMAP+LINCS apenas) | **21** (14 CREEDS+LINCS, 6 CMAP+LINCS, 1 todos) | 🔴 **ERRADO**, 7 é apenas CMAP+LINCS |
+| Down: 676 (53,4%) | 676 entradas não-unificadas | **668** (52,8%) | 🔴 **ERRADO**, 676+605=1281≠1266 |
+| Up: 605 (47,8%) | 605 entradas não-unificadas | **598** (47,2%) | 🔴 **ERRADO**, mesmo problema |
 
 **Conclusão:** A Tabela 1 inteira usa contagens do ranking NÃO-UNIFICADO (1281 entradas), mas as porcentagens são calculadas sobre o total UNIFICADO (1266). Isso é uma **inconsistência matemática**. A tabela precisa ser recalculada com dados unificados.
 
@@ -107,7 +107,7 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 4 — AUDITORIA METODOLÓGICA
+## ETAPA 4, AUDITORIA METODOLÓGICA
 
 | Etapa declarada | Executada pelo script.R? | Evidência |
 |----------------|--------------------------|-----------|
@@ -116,7 +116,7 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 | GSEA/GSVA da via AMPK | ❌ NÃO | Script externo não compartilhado |
 | Consulta DGB (geração do XLSX) | ❌ NÃO | Ferramenta web externa |
 | Leitura e processamento do XLSX | ✅ SIM | `read_nqo1_xlsx()` |
-| Ranking | ✅ SIM* | `rank_nqo1_drugs()` — mas não re-executado |
+| Ranking | ✅ SIM* | `rank_nqo1_drugs()`, mas não re-executado |
 | Volcano plot | ✅ SIM | `plot_volcano()` |
 | Dose-response | ✅ SIM | `plot_dose_response()` |
 | Rede PPI (STRING) | ✅ SIM | `plot_ppi_network()` |
@@ -128,7 +128,7 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 5 — AUDITORIA FRASE POR FRASE
+## ETAPA 5, AUDITORIA FRASE POR FRASE
 
 | # | Frase | Classificação | Evidência |
 |---|-------|--------------|-----------|
@@ -142,7 +142,7 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 | 8 | "doxorrubicina (q-value = 2,21×10⁻²⁸; FC médio = −1,065; downregulador; CREEDS e LINCS)" | ✅ VERDADEIRA | Dados unificados corretos |
 | 9 | "n = 15, duas plataformas" | ✅ VERDADEIRA | 10 CREEDS + 5 LINCS = 15 |
 | 10 | "11 (55%) downreguladores e 9 (45%) upreguladores" no top 20 | ⚠️ DEPENDE | Top 20 unificado pode ter proporção diferente |
-| 11 | "19 dos 20 (95%) LINCS L1000" | ⚠️ DEPENDE | Unificado: 18/20 (90%) — doxorubicina é CREEDS+LINCS |
+| 11 | "19 dos 20 (95%) LINCS L1000" | ⚠️ DEPENDE | Unificado: 18/20 (90%), doxorubicina é CREEDS+LINCS |
 | 12 | "escore composto definido como: score = −log₁₀(q-value) × |Fold Change|" | ⚠️ IMPRECISA | O código usa max(score_individual), não score_agregado |
 | 13 | "O escore penaliza fármacos com q-values elevados" | ✅ VERDADEIRA | Conceitualmente correto |
 | 14 | "direção consolidada foi determinada pelo Fold Change mediano" | ✅ VERDADEIRA | Confirmado no código |
@@ -155,7 +155,7 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 6 — AUDITORIA FARMACOGENÔMICA
+## ETAPA 6, AUDITORIA FARMACOGENÔMICA
 
 | Verificação | Resultado |
 |-------------|-----------|
@@ -171,7 +171,7 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 7 — AUDITORIA ESTATÍSTICA
+## ETAPA 7, AUDITORIA ESTATÍSTICA
 
 | Problema | Descrição | Gravidade |
 |----------|-----------|-----------|
@@ -185,7 +185,7 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 8 — AUDITORIA BIOLÓGICA
+## ETAPA 8, AUDITORIA BIOLÓGICA
 
 | Interpretação no paper | Problema |
 |------------------------|----------|
@@ -198,22 +198,22 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 9 — AUDITORIA DAS REFERÊNCIAS
+## ETAPA 9, AUDITORIA DAS REFERÊNCIAS
 
 | Ref | Suporta? | Observação |
 |-----|----------|------------|
 | [1] HODOS 2016 | ✅ | In silico drug repurposing |
-| [2] EKINS 2019 | ⚠️ | ML para drug discovery — tangencial |
+| [2] EKINS 2019 | ⚠️ | ML para drug discovery, tangencial |
 | [3] LAMB 2006 | ✅ | Connectivity Map original |
 | [4] ROSS 2017 | ✅ | NQO1 functions |
 | [5] DINKOVA-KOSTOVA 2010 | ✅ | NQO1/NRF2 cytoprotection |
 | [6] WANG 2021 | ✅ | DGB platform |
 | [7] SUBRAMANIAN 2017 | ✅ | LINCS L1000 platform |
-| [8] YOSHIDA 1995 | ⚠️ | Trichostatin A/HDAC — **1995, desatualizada**. Existem revisões mais recentes. |
+| [8] YOSHIDA 1995 | ⚠️ | Trichostatin A/HDAC, **1995, desatualizada**. Existem revisões mais recentes. |
 | [9] GHAZNAVI 2023 | ✅ | Parthenolide review |
-| [10] WALLACE 2003 | ⚠️ | Doxorubicin cardiotoxicity — **2003, 23 anos**. Existem revisões mais recentes. |
-| [11] BOZKURT 2021 | ⚠️ | CMD review — citada apenas como contexto. OK. |
-| [12] ZANGIROLAMI-RAIMUNDO 2018 | ⚠️ | Estudos transversais — **tangencial**. Não suporta nenhuma afirmação específica. |
+| [10] WALLACE 2003 | ⚠️ | Doxorubicin cardiotoxicity, **2003, 23 anos**. Existem revisões mais recentes. |
+| [11] BOZKURT 2021 | ⚠️ | CMD review, citada apenas como contexto. OK. |
+| [12] ZANGIROLAMI-RAIMUNDO 2018 | ⚠️ | Estudos transversais, **tangencial**. Não suporta nenhuma afirmação específica. |
 
 **Recomendações:**
 - Ref [8]: Substituir por revisão mais recente de HDACi (ex: Seto & Yoshida, Cold Spring Harb Perspect Med, 2014)
@@ -222,14 +222,14 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 10 — AUDITORIA EDITORIAL
+## ETAPA 10, AUDITORIA EDITORIAL
 
 | Aspecto | Avaliação |
 |---------|-----------|
 | Clareza | ✅ Boa. Texto claro e objetivo. |
 | Coesão | ✅ Boa. Seções fluem logicamente. |
 | Coerência | ⚠️ Dados da Tabela 1 inconsistentes com a narrativa. |
-| Repetições | ⚠️ "A doxorrubicina é destacada com destaque visual" — redundante. |
+| Repetições | ⚠️ "A doxorrubicina é destacada com destaque visual", redundante. |
 | Jargão excessivo | ✅ OK para público-alvo. |
 | Linguagem causal | ✅ Controlada. Uso de "consistente com", "poderia explicar", "sugere". |
 | Linguagem translacional | ✅ Removida (corrigido da versão anterior). |
@@ -237,12 +237,12 @@ rank_nqo1_drugs() → 1266 fármacos (pós-unificação case-insensitive)
 
 ---
 
-## ETAPA 11 — PARECER COMO REVISOR DA NATURE
+## ETAPA 11, PARECER COMO REVISOR DA NATURE
 
 ### Major Comments
 
 **1. Inconsistência crítica nos dados da Tabela 1.**
-As contagens de fármacos por direção (676 + 605 = 1281) não correspondem ao total declarado de 1266 fármacos únicos. As porcentagens (53,4% e 47,8%) são calculadas com denominador unificado (1266) mas numeradores não-unificados (1281). Além disso, o número de fármacos multi-plataforma (7) está subestimado — a unificação case-insensitive revela 21 fármacos com evidência em múltiplas bases. A Tabela 1 deve ser completamente recalculada após a execução do script corrigido com agrupamento case-insensitive.
+As contagens de fármacos por direção (676 + 605 = 1281) não correspondem ao total declarado de 1266 fármacos únicos. As porcentagens (53,4% e 47,8%) são calculadas com denominador unificado (1266) mas numeradores não-unificados (1281). Além disso, o número de fármacos multi-plataforma (7) está subestimado, a unificação case-insensitive revela 21 fármacos com evidência em múltiplas bases. A Tabela 1 deve ser completamente recalculada após a execução do script corrigido com agrupamento case-insensitive.
 
 **2. Divergência entre o escore descrito e o escore implementado.**
 O manuscrito define o escore como `−log₁₀(q-value) × |Fold Change|`, mas o código (script.R, função `rank_nqo1_drugs`) calcula `max(−log₁₀(qᵢ) × |FCᵢ|)` para registros individuais, não para o efeito agregado. Isso produz scores substancialmente diferentes (ex: trichostatin A: 60,7 pelo código vs. 34,0 pela fórmula descrita). Os autores devem alinhar a descrição metodológica com a implementação real ou alterar o código.
@@ -280,7 +280,7 @@ O script.R não produz a tabela de distribuição plataforma/direção apresenta
 
 ---
 
-## ETAPA 12 — TESTE DE ROBUSTEZ
+## ETAPA 12, TESTE DE ROBUSTEZ
 
 > *"Se eu remover esta conclusão, o estudo continua válido?"*
 
@@ -296,7 +296,7 @@ O script.R não produz a tabela de distribuição plataforma/direção apresenta
 
 ---
 
-## ETAPA 13 — 🔒 LOCK FINAL
+## ETAPA 13, 🔒 LOCK FINAL
 
 | Item | Definição |
 |------|-----------|
@@ -308,7 +308,7 @@ O script.R não produz a tabela de distribuição plataforma/direção apresenta
 | **Dados NÃO utilizados** | GSE116250 (apenas contexto); STRING (apenas PPI contextual); PubChem (output vazio); DEG_full_table.csv (apenas para identificar NQO1) |
 | **Métodos utilizados** | Padronização de nomenclatura (case-insensitive); conversão de unidades (→µM); escore composto; agrupamento por fármaco; ranking por q-value e score |
 | **Métodos NÃO utilizados** | GEOquery; limma; GSEA; GSVA; consulta PubChem ativa; qualquer validação experimental |
-| **Limitações obrigatórias** | (1) In silico — requer validação experimental; (2) Dados de linhagens tumorais — podem não refletir tipos celulares primários; (3) Predominância de LINCS L1000 (genes Landmark, ~1000 transcritos); (4) Escore composto não validado externamente; (5) Variabilidade experimental entre registros do mesmo fármaco |
+| **Limitações obrigatórias** | (1) In silico, requer validação experimental; (2) Dados de linhagens tumorais, podem não refletir tipos celulares primários; (3) Predominância de LINCS L1000 (genes Landmark, ~1000 transcritos); (4) Escore composto não validado externamente; (5) Variabilidade experimental entre registros do mesmo fármaco |
 | **Conclusões PERMITIDAS** | (a) Ranking dos 5 fármacos com maior evidência estatística; (b) Fármacos com maior magnitude de modulação; (c) Distribuição up/down; (d) Distribuição por plataforma; (e) Fármacos com evidência multi-plataforma; (f) Recurso para priorização de validação experimental futura |
 | **Conclusões PROIBIDAS** | ❌ Mecanismos moleculares; ❌ Causalidade; ❌ Implicações clínicas; ❌ Farmacovigilância; ❌ Enfermagem de precisão; ❌ Cardiotoxicidade demonstrada; ❌ Validação da via AMPK; ❌ Proteção redox; ❌ Resposta adaptativa/compensatória |
 | **Título definitivo** | **Ranqueamento Farmacogenômico in silico de Fármacos Moduladores da Expressão do Gene NQO1 por Integração das Bases CMAP, LINCS L1000 e CREEDS** |
@@ -341,4 +341,4 @@ O script.R não produz a tabela de distribuição plataforma/direção apresenta
 
 ---
 
-*Relatório produzido em 2026-06-26. Auditoria forense definitiva — LOCK FINAL.*
+*Relatório produzido em 2026-06-26. Auditoria forense definitiva, LOCK FINAL.*

@@ -1,19 +1,29 @@
 # ==============================================================================
-# requirements.txt — dependencias Python (ferramentas de auditoria e QC)
+# requirements.txt: dependências Python para análises futuras
 #
-# Instalar com:  pip install -r requirements.txt
+# O pipeline analítico atual está inteiramente em R (analise_nqo1_cardiotoxicidade.R). As dependências
+# em R estão listadas no DESCRIPTION e no README.md.
 #
-# O pipeline analitico principal e escrito em R (script.R). As dependencias R
-# estao documentadas no README.md (secao "Instrucoes de Reproducao") e podem ser
-# instaladas com:
-#   install.packages(c("dplyr","ggplot2","stringr","openxlsx","igraph","tidyr","yaml"))
+# Este arquivo cobre apenas as análises in silico futuras que usam Python:
+# docking molecular, consulta a APIs e aprendizado de máquina.
+#
+# Instalar com: pip install -r requirements.txt
 # ==============================================================================
 
+# Manipulacao de dados
 pandas>=2.0.0
 numpy>=1.24.0
 openpyxl>=3.1.0
 pyyaml>=6.0
+
+# Gráficos
 matplotlib>=3.7.0
 seaborn>=0.12.0
+
+# Estatística e APIs
 scipy>=1.10.0
+requests>=2.31.0
+
+# Aprendizado de máquina
 scikit-learn>=1.2.0
+shap>=0.44.0

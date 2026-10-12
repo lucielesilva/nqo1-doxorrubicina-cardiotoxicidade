@@ -1,7 +1,7 @@
 # ==============================================================================
 # .gitignore — nqo1-doxorrubicina-cardiotoxicidade
-# Mantem o repositorio limpo: nao versiona lixo de SO/IDE, cache, logs e segredos.
-# Os dados cientificos (data/raw/*.gz) e resultados (output/*) SAO versionados.
+# Mantém o repositorio limpo: não versiona lixo de SÓ/IDE, cache, logs e segredos.
+# Os dados cientificos (data/raw/*.gz) e resultados (output/*) SÃO versionados.
 # ==============================================================================
 
 # --- Sistema operacional ------------------------------------------------

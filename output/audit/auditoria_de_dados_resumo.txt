@@ -1,0 +1,55 @@
+# Auditoria de dados
+
+Data: 2026-10-12 10:10:24
+
+## 1. Tabela NQO1 limpa
+Dimensoes: 3523 linhas x 25 colunas
+Linhas duplicadas: 0
+Coluna-indice X1 presente: FALSE
+p_value igual a zero: 1
+q_value igual a zero: 1
+Colunas com mais de 5% de valores ausentes: CREEDS_ID, GEO_ID, DrugBank_ID
+
+## 2. Doxorubicina e NQO1
+Registros: 15
+Fold Change medio: -1.0651
+Fold Change mediano: -0.8069
+Maior |Fold Change|: 4.2132
+Menor q-value: 2.21e-28
+
+## 3. Expressão diferencial
+Genes: 41842 | genes duplicados: 0
+Genes significativos (padj < 0.05): 8618
+NQO1 log2FC: -1.6891 | padj: 1.673e-12 | direção: down
+NQO1 supera o limiar |log2FC| > 0.585: TRUE
+
+## 4. Outliers (|Z| > 3)
+p_value: 99 | q_value: 4 | Fold_Change: 6 | Specificity: 29 | score: 78 | neg_log10_q_capped: 77
+
+## 5. Matriz RPKM
+Amostras: 64 | genes: 57974
+Classes: DCM = 37, ICM = 13, NF = 14
+Celulas ausentes: 0 de 3710336 ( 0 %)
+NQO1 presente: TRUE
+NQO1 RPKM medio: 21.187 | mediano: 14.64
+
+## 6. Consistencia amostra x metadado
+Amostras na matriz: 64 | amostras no metadado: 64
+Somente na matriz: 
+Somente no metadado: 
+
+## 7. Rede PPI
+Arestas: 1874 | duplicadas: 0
+Nos: 119 | duplicados: 0
+
+## 8. GSEA da via AMPK
+NES: -1.2521 | padj: 0.072 | significativo (padj < 0.05): FALSE
+
+## 9. Integridade dos outputs finais
+expressao_diferencial_completa.csv : 41842 linhas x 10 colunas
+expressao_nqo1_diferencial.csv : 1 linhas x 10 colunas
+expressao_diferencial_via_ampk.csv : 120 linhas x 11 colunas
+gsea_via_ampk.csv : 1 linhas x 8 colunas
+gsva_via_ampk.csv : 51 linhas x 3 colunas
+resumo_doxorrubicina_nqo1.csv : 1 linhas x 12 colunas
+dgb_resultados_nqo1.xlsx : presente

@@ -1,61 +1,59 @@
 # ==============================================================================
-# config.yaml — Configuracao centralizada de thresholds do projeto
+# config.yaml: configuração centralizada de limiares do projeto
 # nqo1-doxorrubicina-cardiotoxicidade
 #
-# Objetivo: separar os parametros analiticos do codigo-fonte. O usuario pode
-# alterar qualquer threshold aqui sem tocar nos scripts (script.R / scripts/*).
+# Objetivo: separar os parâmetros analíticos do código-fonte. O usuário pode
+# alterar qualquer limiar aqui sem tocar no pipeline R.
 #
-# Leitura sugerida em R:   cfg <- yaml::read_yaml("config.yaml")
-# Leitura sugerida em Python: import yaml; cfg = yaml.safe_load(open("config.yaml"))
+# Leitura em R:      cfg <- yaml::read_yaml("config.yaml")
+# Leitura em Python: import yaml; cfg = yaml.safe_load(open("config.yaml"))
+#
+# Escopo: apenas análises in silico, com dados públicos secundários.
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-# 0. Contexto do projeto (fluxo analitico definitivo)
+# 0. Contexto do projeto (fluxo analítico definitivo)
 # ------------------------------------------------------------------------------
 project:
-  title: "NQO1 na Cardiomiopatia Dilatada e o Repressor Farmacologico Doxorrubicina"
-  dataset: "GSE116250 (RNA-seq, miocardio humano, nao microarray)"
+  title: "Análise integrativa in silico da regulação do NQO1 e da cardiotoxicidade da doxorrubicina na cardiomiopatia dilatada"
+  dataset: "GSE116250 (RNA-seq, miocárdio humano)"
   cohort:
-    CTRL: 14    # non-failing (tambem rotulado como NF)
+    CTRL: 14    # non-failing (também rotulado como NF)
     DCM: 37     # dilated cardiomyopathy
-    ICM: 13     # ischemic cardiomyopathy (excluido do contraste DCM vs CTRL)
+    ICM: 13     # ischemic cardiomyopathy (excluído do contraste DCM vs CTRL)
   group_label_map:
     non-failing: "CTRL"
     NF: "CTRL"
     CTRL: "CTRL"
-  # Fluxo logico do estudo (3 passos)
+  # Fluxo lógico do estudo em três passos.
   steps:
-    passo1: "Analise exploratoria da via AMPK (hsa04152) na DCM — NAO significativa (GSEA NES=-1.19, padj=0.419)"
-    passo2: "Expressao diferencial do transcriptoma completo -> NQO1 downregulado (log2FC=-1.686, padj=6.86e-13)"
-    passo3: "DGB (CMAP/LINCS/CREEDS) -> Doxorrubicina (q=2.21e-28, down, 2 bases)"
+    passo1: "Análise exploratória da via AMPK (hsa04152) na DCM. Não significativa (GSEA NES = -1.19, padj = 0.419)."
+    passo2: "Expressão diferencial do transcriptoma completo. NQO1 downregulado (log2FC = -1.686, padj = 6.86e-13)."
+    passo3: "DGB (CMAP, LINCS L1000 e CREEDS). Doxorrubicina (q = 2.21e-28, down, 2 bases)."
   target_gene: "NQO1"
   target_gene_log2fc: -1.686
   target_gene_padj: 6.86e-13
-  target_gene_direction_in_DCM: "down"   # NQO1 NAO pertence a via AMPK
+  target_gene_direction_in_DCM: "down"   # NQO1 não pertence à via AMPK
   ampk_pathway_kegg_id: "hsa04152"
-  ampk_gsea_padj: 0.419                   # via AMPK NAO significativa (FDR > 0.05)
+  ampk_gsea_padj: 0.419                   # via AMPK não significativa (FDR > 0.05)
   drug_gene_tool: "Drug Gene Budger (DGB)"
   dgb_sources: ["CMAP", "LINCS L1000", "CREEDS"]
-  top_drug: "doxorubicina (downregulador de NQO1; q=2.21e-28; CREEDS + LINCS L1000)"
-  ranking_note: "trichostatin A tem q=0 por underflow (fonte unica CMAP); doxorrubicina e o menor q-value real"
+  top_drug: "doxorrubicina (downregulador de NQO1, q = 2.21e-28, CREEDS e LINCS L1000)"
+  ranking_note: "trichostatin A tem q = 0 por underflow (fonte única CMAP). A doxorrubicina é o menor q-value real."
 
 # ------------------------------------------------------------------------------
-# 1. Thresholds de viabilidade celular (MTT / SRB / resazurina)
-#    OBS.: o dataset atual (GSE116250) NAO contem ensaio de viabilidade.
-#    Estes limites se aplicam caso um ensaio de viabilidade seja incorporado.
+# 1. Escopo
 # ------------------------------------------------------------------------------
-viability:
-  assay: "MTT/SRB"                       # ensaio esperado; ajuste se usar resazurina
-  control_mean_min: 0.9                  # media do grupo Controle (normalizado)
-  control_mean_max: 1.1                  # media do grupo Controle (normalizado)
-  doxo_alert_if_above: 0.8               # ALERTA CRITICO se viabilidade Doxo > 0.8
-  significant_drop_min: 0.2              # queda minima esperada (Controle - Doxo)
+scope:
+  modality: "in silico"
+  primary_data: false
+  note: "O projeto não inclui ensaio experimental próprio. A validação experimental não faz parte do plano."
 
 # ------------------------------------------------------------------------------
-# 2. Thresholds de expressao genica (qPCR / RNA-seq)
+# 2. Limiares de expressão gênica (RNA-seq)
 # ------------------------------------------------------------------------------
 expression:
-  fold_change_significant: 1.5           # |FC| > 1.5 => significativo (benchmark)
+  fold_change_significant: 1.5           # |FC| > 1.5 indica efeito significativo
   log2fc_significant: 0.585              # log2(1.5), para dados em escala log2
   padj_alpha: 0.05                       # FDR alvo
   log2fc_direction:
@@ -66,52 +64,50 @@ expression:
 # 3. Outliers (Z-score)
 # ------------------------------------------------------------------------------
 outliers:
-  z_score_threshold: 3.0                 # |Z| > 3.0 => outlier reportado
-  action: "winsorize"                    # opcoes: "winsorize" | "remove" | "flag_only"
+  z_score_threshold: 3.0                 # |Z| > 3.0 indica outlier reportado
+  action: "winsorize"                    # opções: winsorize, remove ou flag_only
 
 # ------------------------------------------------------------------------------
-# 4. Testes estatisticos e correcao multipla
+# 4. Testes estatísticos e correção múltipla
 # ------------------------------------------------------------------------------
 statistics:
-  two_group_test: "wilcoxon"             # "t_test" | "wilcoxon"
-  multi_group_test: "anova"              # "anova" | "kruskal"
+  two_group_test: "wilcoxon"             # t_test ou wilcoxon
+  multi_group_test: "anova"              # anova ou kruskal
   multiple_testing_method: "benjamini-hochberg"   # FDR (BH)
   fdr_alpha: 0.05
 
 # ------------------------------------------------------------------------------
-# 5. Normalizacao de expressao
+# 5. Normalização de expressão
 # ------------------------------------------------------------------------------
 normalization:
-  expected: "log2-TMM"                   # metodo esperado para RNA-seq
-  rna_seq_method: "TMM"                  # TMM | RLE | quantile
-  transform: "log2"                      # log2 | vst | rlog
+  expected: "log2-TMM"                   # método esperado para RNA-seq
+  rna_seq_method: "TMM"                  # TMM, RLE ou quantile
+  transform: "log2"                      # log2, vst ou rlog
   warn_if_not_normalized: true
 
 # ------------------------------------------------------------------------------
-# 6. Imputacao de dados faltantes (pre-processamento)
+# 6. Imputação de dados faltantes (pré-processamento)
 # ------------------------------------------------------------------------------
 imputation:
-  method: "knn"                          # "knn" | "mean" | "median" | "mice"
+  method: "knn"                          # knn, mean, median ou mice
   k_neighbors: 5
-  missing_threshold_report: 0.05         # alerta se % NA > 5% por variavel
+  missing_threshold_report: 0.05         # alerta se a fração de NA for maior que 5%
 
 # ------------------------------------------------------------------------------
-# 7. Machine learning (se aplicavel)
+# 7. Aprendizado de máquina (análise futura, item 5.6)
 # ------------------------------------------------------------------------------
 machine_learning:
-  enabled: false                         # nao ha ensaio de viabilidade rotulado no projeto
-  model: "random_forest"                 # "random_forest" | "logistic_regression"
+  enabled: false                         # prever cardiotoxicidade a partir de assinaturas de fármacos
+  model: "random_forest"                 # random_forest ou logistic_regression
   test_split: 0.25
   seed: 42
   shap: true
 
 # ------------------------------------------------------------------------------
-# 8. Entradas / saidas
+# 8. Entradas e saídas
 # ------------------------------------------------------------------------------
 paths:
   raw_data: "data/raw"
-  processed_data: "data/processed"       # ainda nao criado; ver README
-  scripts: "scripts"
-  results: "results"
+  processed_data: "data/processed"
+  results: "output"
   reports: "reports"
-  outputs: "output"

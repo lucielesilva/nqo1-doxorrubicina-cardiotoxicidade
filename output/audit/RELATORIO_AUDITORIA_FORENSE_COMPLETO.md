@@ -2,12 +2,12 @@
 
 **Projeto**: resumo_expandido_luciele_cardiologia_2026
 **Data da auditoria**: 2026-06-26
-**Auditor**: Revisão forense completa — 15 etapas
+**Auditor**: Revisão forense completa, 15 etapas
 **Arquivos analisados**: script.R, resumo_expandido .docx, todos os outputs (.csv, .xlsx, .png, .md, .RData), diretórios data/ e output/
 
 ---
 
-## ETAPA 1 — RECONSTRUÇÃO DO FLUXO CIENTÍFICO REAL
+## ETAPA 1, RECONSTRUÇÃO DO FLUXO CIENTÍFICO REAL
 
 ### Fluxograma do pipeline REAL (o que o script.R efetivamente faz)
 
@@ -89,63 +89,63 @@
 
 ---
 
-## ETAPA 2 — AUDITORIA LINHA POR LINHA DO script.R
+## ETAPA 2, AUDITORIA LINHA POR LINHA DO script.R
 
-### Bloco 1: Cabeçalho e metadados (linhas 1–59)
+### Bloco 1: Cabeçalho e metadados (linhas 1-59)
 - **O que faz**: Documenta estrutura de diretórios e instruções de uso
 - **Problema**: A estrutura declarada menciona `output/tables/ampk/`, `output/tables/pubchem/`, `output/tables/nqo1/` mas **não menciona** `output/tables/ppi/`, que o código efetivamente cria e usa
 - **Gravidade**: BAIXA (inconsistência de documentação)
 
-### Bloco 2: Configuração de diretórios (linhas 60–81)
+### Bloco 2: Configuração de diretórios (linhas 60-81)
 - **O que faz**: Detecta raiz do projeto, define estrutura de diretórios
 - **Problema**: `tables_ppi` está definido no código (linha 71) mas NÃO está documentado no cabeçalho
 - **Gravidade**: BAIXA
 
-### Bloco 3: Sistema de auditoria (linhas 83–96)
+### Bloco 3: Sistema de auditoria (linhas 83-96)
 - **O que faz**: Cria `AUDIT_EVENTS` como data.frame global, função `audit_log()` com `<<-`
-- **Problema**: Uso de `<<-` (superassignment) é correto aqui, mas o data.frame cresce com `rbind()` a cada evento — O(n²) ineficiente, mas com ~15 eventos é irrelevante
+- **Problema**: Uso de `<<-` (superassignment) é correto aqui, mas o data.frame cresce com `rbind()` a cada evento, O(n²) ineficiente, mas com ~15 eventos é irrelevante
 - **Gravidade**: BAIXA
 
-### Bloco 4: Carregamento de pacotes (linhas 98–106)
+### Bloco 4: Carregamento de pacotes (linhas 98-106)
 - **O que faz**: `require_pkg()` verifica e carrega dplyr, ggplot2, stringr, openxlsx, igraph
 - **OK**: Sem problemas
 
-### Bloco 5: Funções utilitárias (linhas 108–139)
+### Bloco 5: Funções utilitárias (linhas 108-139)
 - **`find_first_existing`**: Busca arquivo em múltiplos paths. OK.
 - **`save_plot`**: Salva com ggsave. OK.
 - **`read_csv_flexible`**: Lê CSV com trimws nos nomes. OK.
 - **`standardize_names`**: Converte espaços/hífens/pontos para underscore. OK.
-- **⚠️ `cleanup_unneeded_outputs`**: Lista hardcoded de arquivos para deletar. Remove `DGB_results_NQO1.csv` e `DGB_results_NQO1_clean.csv` mas o script está gerando `DGB_results_NQO1_from_xlsx_clean.csv` — nomes diferentes. OK (não conflita).
+- **⚠️ `cleanup_unneeded_outputs`**: Lista hardcoded de arquivos para deletar. Remove `DGB_results_NQO1.csv` e `DGB_results_NQO1_clean.csv` mas o script está gerando `DGB_results_NQO1_from_xlsx_clean.csv`, nomes diferentes. OK (não conflita).
 
-### Bloco 6: `decimal_to_numeric` (linhas 141–149)
+### Bloco 6: `decimal_to_numeric` (linhas 141-149)
 - **O que faz**: Converte números com vírgula decimal (formato europeu) para numeric
 - **Lógica**: Se tem vírgula, remove todos os pontos (separadores de milhar) e troca vírgula por ponto
-- **⚠️ Problema**: Se um número tem ponto como decimal E vírgula como milhar (ex: "1.234,56"), funciona. Mas se o formato for "1,234.56" (vírgula como milhar, ponto como decimal — formato anglo-americano), a função removeria a vírgula incorretamente. Isso depende do locale do Excel que gerou o XLSX.
+- **⚠️ Problema**: Se um número tem ponto como decimal E vírgula como milhar (ex: "1.234,56"), funciona. Mas se o formato for "1,234.56" (vírgula como milhar, ponto como decimal, formato anglo-americano), a função removeria a vírgula incorretamente. Isso depende do locale do Excel que gerou o XLSX.
 - **Gravidade**: BAIXA (funciona para o XLSX atual, mas frágil)
 
-### Bloco 7: `q_to_neglog10` (linhas 151–154)
+### Bloco 7: `q_to_neglog10` (linhas 151-154)
 - **O que faz**: Calcula -log10(q) com cap em 50
 - **OK**: Correta. Valores q=0 são capados em 10⁻⁵⁰ → -log10 = 50
 
-### Bloco 8: `extract_dose_um` (linhas 156–167)
+### Bloco 8: `extract_dose_um` (linhas 156-167)
 - **O que faz**: Extrai valor numérico e unidade (nM, µM, mM) de string de dose, converte para µM
-- **Regex**: `\\d+(?:\\.\\d+)?` — captura números com ponto decimal
+- **Regex**: `\\d+(?:\\.\\d+)?`, captura números com ponto decimal
 - **⚠️ Problema**: Se a dose vier com vírgula decimal (ex: "0,1 µM"), o regex `\\d+(?:\\.\\d+)?` NÃO captura porque espera ponto. Mas `str_replace_all(dose, ",", ".")` é aplicado antes.
 - **OK**: Funciona para o formato atual, mas a ordem das operações é frágil
 
-### Bloco 9: `read_nqo1_xlsx` (linhas 169–218) — FUNÇÃO CENTRAL
+### Bloco 9: `read_nqo1_xlsx` (linhas 169-218), FUNÇÃO CENTRAL
 - **O que faz**: Lê todas as abas do XLSX, padroniza colunas, classifica direção, calcula score
 - **Verificações**:
   - ✅ Exige colunas Drug_Name, p_value, q_value, Fold_Change
   - ✅ Detecta fonte (CMAP/LINCS/CREEDS) pelo nome da aba
   - ✅ Detecta expected_direction (up/down) pelo sufixo da aba
-  - ⚠️ `expected_direction` é calculado mas **NUNCA USADO** depois — código morto
-  - ⚠️ Se `Specificity` não existe, define como NA — mas Specificity **nunca é usado** depois
+  - ⚠️ `expected_direction` é calculado mas **NUNCA USADO** depois, código morto
+  - ⚠️ Se `Specificity` não existe, define como NA, mas Specificity **nunca é usado** depois
   - ✅ `regulation` é definido por `Fold_Change > 0` → "Upregula", `< 0` → "Downregula"
   - ✅ `score = neg_log10_q_capped * abs(Fold_Change)`
   - ⚠️ **`score` usa `neg_log10_q_capped` (que é baseado em `q_value_for_plot = pmax(q_value, 1e-50)`)**, mas `q_to_neglog10` usa `pmax(q_value, 10^-cap)` onde cap=50. São consistentes.
 
-### Bloco 10: `rank_nqo1_drugs` (linhas 220–243) — FUNÇÃO CRÍTICA
+### Bloco 10: `rank_nqo1_drugs` (linhas 220-243), FUNÇÃO CRÍTICA
 - **O que faz**: Agrupa por Drug_Name, calcula estatísticas resumo
 - **⚠️ PROBLEMA**: Agrupamento é **CASE SENSITIVE**. "Doxorubicin" ≠ "doxorubicin"
 - **Evidência nos outputs**:
@@ -153,16 +153,16 @@
   Doxorubicin (CREEDS):     n_tests=10, direction="Downregula NQO1"
   doxorubicin (LINCS L1000): n_tests=5,  direction="Downregula NQO1"
   ```
-- **direction** usa `median_fc`, não `mean_fc`. Correto pela lógica, mas manumycin-a tem mean_fc negativo (-0,0097) e median_fc positivo (+0,746) → classificado como "Upregula" — contra-intuitivo.
+- **direction** usa `median_fc`, não `mean_fc`. Correto pela lógica, mas manumycin-a tem mean_fc negativo (-0,0097) e median_fc positivo (+0,746) → classificado como "Upregula", contra-intuitivo.
 - **Gravidade**: MÉDIA
 
-### Bloco 11: `plot_volcano` (linhas 245–275)
+### Bloco 11: `plot_volcano` (linhas 245-275)
 - **O que faz**: Volcano plot com pontos coloridos por regulação
 - **q_was_zero**: trichostatin A tem q=0 → formato diferente (triângulo)
 - **Top labels**: 12 fármacos com menor q-value e maior |Fold_Change|
 - **OK**: Código correto
 
-### Bloco 12: `plot_dose_response` (linhas 277–344)
+### Bloco 12: `plot_dose_response` (linhas 277-344)
 - **O que faz**: Dose-response facetado por fármaco
 - **Lógica complexa de seleção**:
   1. Filtra drogas com ≥2 doses numéricas → ordena por q-value e score → top 9
@@ -170,15 +170,15 @@
   3. Fallback: se nenhuma droga tem ≥2 doses, usa top por q-value
 - **OK**: Código robusto, com fallbacks
 
-### Bloco 13: `load_pubchem` (linhas 346–356)
+### Bloco 13: `load_pubchem` (linhas 346-356)
 - **O que faz**: Carrega CSV PubChem pré-existente
 - **OK**: Se não encontra, retorna data.frame vazio
 
-### Bloco 14: `plot_pubchem_counts` (linhas 358–375)
+### Bloco 14: `plot_pubchem_counts` (linhas 358-375)
 - **O que faz**: Gráfico de barras top 20 genes × nº de compostos
 - **OK**: Se pubchem_df vazio, retorna NULL
 
-### Bloco 15: `plot_ppi_network` (linhas 377–462)
+### Bloco 15: `plot_ppi_network` (linhas 377-462)
 - **O que faz**: Constrói rede PPI a partir de DEG + STRING
 - **Fluxo**:
   1. Lê DEG_AMPK_pathway.csv
@@ -189,15 +189,15 @@
 - **⚠️** O grafo usa **todos os links**, não apenas os de alta confiança (>700). O `combined_score` é usado como espessura da linha (linewidth), mas não como filtro. O filtro min700 foi aplicado no download do arquivo (`.min700.txt.gz`), não no código.
 - **OK**: Correto, o filtro já está no nome do arquivo
 
-### Bloco 16: `main()` (linhas 464–530)
+### Bloco 16: `main()` (linhas 464-530)
 - **Sequência**: cleanup → ler XLSX → ranking → salvar CSVs → volcano → dose-response → PubChem → PPI → relatório
 - **`doxo` filter (linha 491)**: Busca "doxo|doxorubic|doxorubicin" no ranking
   - ⚠️ Encontra apenas "Doxorubicin" (case sensitive match no ranking). "doxorubicin" (minúsculo) NÃO é capturado por este filtro porque `str_to_lower` é aplicado a `Drug_Name` mas o texto buscado é "doxo" que casa com ambos.
-  - ✅ Na verdade, lendo com mais cuidado: `str_detect(str_to_lower(Drug_Name), "doxo|doxorubic|doxorubicin")` — isso captura ambas as grafias. Mas o ranking tem as duas entradas separadas, então o `doxo` CSV terá 2 linhas.
+  - ✅ Na verdade, lendo com mais cuidado: `str_detect(str_to_lower(Drug_Name), "doxo|doxorubic|doxorubicin")`, isso captura ambas as grafias. Mas o ranking tem as duas entradas separadas, então o `doxo` CSV terá 2 linhas.
 
 ---
 
-## ETAPA 3 — AUDITORIA METODOLÓGICA (REPRODUTIBILIDADE)
+## ETAPA 3, AUDITORIA METODOLÓGICA (REPRODUTIBILIDADE)
 
 ### Matriz de reprodutibilidade
 
@@ -220,7 +220,7 @@
 
 ---
 
-## ETAPA 4 — AUDITORIA DOS RESULTADOS (CRUZAMENTO PAPER × OUTPUTS)
+## ETAPA 4, AUDITORIA DOS RESULTADOS (CRUZAMENTO PAPER × OUTPUTS)
 
 ### Tabela de todas as afirmações numéricas do paper × dados reais
 
@@ -241,7 +241,7 @@
 
 ---
 
-## ETAPA 5 — AUDITORIA BIOLÓGICA
+## ETAPA 5, AUDITORIA BIOLÓGICA
 
 ### 5.1 NQO1 pertence à via AMPK?
 
@@ -270,7 +270,7 @@ Isso é uma **construção narrativa artificial**. O NQO1 foi selecionado da tab
 **SIM, GRAVE.** O paper extrapola de:
 - Dados de linhagens tumorais (MCF7, PC3, VCAP) para cardiomiócitos humanos
 - Associação estatística in vitro para "mecanismo compensatório homeostático"
-- Dados de perturbação aguda (6h–24h) para "farmacovigilância" e "cuidados assistenciais de precisão"
+- Dados de perturbação aguda (6h-24h) para "farmacovigilância" e "cuidados assistenciais de precisão"
 
 ### 5.5 Cherry-picking?
 
@@ -288,7 +288,7 @@ Isso é uma **construção narrativa artificial**. O NQO1 foi selecionado da tab
 
 ---
 
-## ETAPA 6 — AUDITORIA ESTATÍSTICA
+## ETAPA 6, AUDITORIA ESTATÍSTICA
 
 ### 6.1 Múltiplas comparações
 - **GSEA**: 163 vias testadas. Correção FDR aplicada (coluna padj). ✅ OK.
@@ -296,7 +296,7 @@ Isso é uma **construção narrativa artificial**. O NQO1 foi selecionado da tab
 - **DGB**: 3523 testes fármaco-condição. q-values vêm da plataforma DGB (não está claro qual correção). ⚠️
 
 ### 6.2 Interpretação de q-value
-- O paper cita "q-value = 6,32×10⁻⁶" para doxorrubicina. Este valor **não existe**. O q-value real é 2,21×10⁻²⁸. Isso não é um erro de interpretação — é um **dado incorreto**.
+- O paper cita "q-value = 6,32×10⁻⁶" para doxorrubicina. Este valor **não existe**. O q-value real é 2,21×10⁻²⁸. Isso não é um erro de interpretação, é um **dado incorreto**.
 
 ### 6.3 Interpretação de Fold Change
 - O paper interpreta Fold Change positivo como "indução". Mas o Fold Change no DGB representa a mudança na expressão de NQO1 após tratamento. Para doxorrubicina, é **negativo** (−0,315 e −2,565), indicando **repressão**, não indução.
@@ -312,7 +312,7 @@ Isso é uma **construção narrativa artificial**. O NQO1 foi selecionado da tab
 
 ---
 
-## ETAPA 7 — AUDITORIA FARMACOGENÔMICA
+## ETAPA 7, AUDITORIA FARMACOGENÔMICA
 
 ### 7.1 Direção da regulação
 
@@ -329,17 +329,17 @@ Isso é uma **construção narrativa artificial**. O NQO1 foi selecionado da tab
 
 ### 7.3 Ranking do paper vs código
 O paper menciona "cinco primeiros colocados no ranking molecular". O ranking real:
-1. trichostatin A (CMAP) — q=0, Up
-2. Doxorubicin (CREEDS) — q=2,21e-28, Down
-3. manumycin-a (LINCS) — q=3,62e-20, Up
-4. parthenolide (LINCS) — q=4,42e-19, Up
-5. panobinostat (LINCS) — q=6,60e-18, Down
+1. trichostatin A (CMAP), q=0, Up
+2. Doxorubicin (CREEDS), q=2,21e-28, Down
+3. manumycin-a (LINCS), q=3,62e-20, Up
+4. parthenolide (LINCS), q=4,42e-19, Up
+5. panobinostat (LINCS), q=6,60e-18, Down
 
-O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinostat** — foca apenas em doxorrubicina, geldanamicina, wortmannin e monensina, que **não estão entre os top 5** (geldanamicina está na posição ~48, wortmannin ~60, monensina não existe).
+O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinostat**, foca apenas em doxorrubicina, geldanamicina, wortmannin e monensina, que **não estão entre os top 5** (geldanamicina está na posição ~48, wortmannin ~60, monensina não existe).
 
 ---
 
-## ETAPA 8 — AUDITORIA DAS FIGURAS
+## ETAPA 8, AUDITORIA DAS FIGURAS
 
 ### 8.1 `volcano_NQO1_drugs.png`
 - **Corresponde aos dados?** ✅ Sim
@@ -350,7 +350,7 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 
 ### 8.2 `dose_response_NQO1_drugs.png`
 - **Corresponde aos dados?** ✅ Sim
-- **Subtítulo:** "Doxorubicin incluída a partir dos registros LINCS com 10 µM" — ✅
+- **Subtítulo:** "Doxorubicin incluída a partir dos registros LINCS com 10 µM", ✅
 - **OK**
 
 ### 8.3 `pubchem_top_genes_compound_counts.png`
@@ -369,13 +369,13 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 
 ---
 
-## ETAPA 9 — AUDITORIA TEXTUAL (FRASE POR FRASE)
+## ETAPA 9, AUDITORIA TEXTUAL (FRASE POR FRASE)
 
 ### Resumo
 
 | # | Frase | Classificação | Motivo |
 |---|-------|--------------|--------|
-| 1 | "triagem transcriptômica in silico da via AMPK utilizando dados do dataset GSE116250" | PARCIALMENTE CORRETA | O GSE116250 foi usado, mas a triagem não foi "da via AMPK" — NQO1 veio do DEG completo |
+| 1 | "triagem transcriptômica in silico da via AMPK utilizando dados do dataset GSE116250" | PARCIALMENTE CORRETA | O GSE116250 foi usado, mas a triagem não foi "da via AMPK", NQO1 veio do DEG completo |
 | 2 | "gene NQO1 foi selecionado devido à sua relevância biológica na citoproteção e homeostase redox" | CORRETA | NQO1 tem esse papel documentado |
 | 3 | "doxorrubicina atua como um importante modulador transcriptômico positivo" | **FALSA** | Dados mostram DOWNregulation (mean_fc = −0,315 e −2,565) |
 | 4 | "q-value = 6,32e-6" | **FALSA** | Valor real: 2,21×10⁻²⁸. Nenhum registro tem q=6,32e-6 |
@@ -389,32 +389,32 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 |---|-------|--------------|
 | 8 | "CMD consiste em uma das principais etiologias" | CORRETA |
 | 9 | "AMPK funciona como um sensor energético celular mestre" | CORRETA |
-| 10 | "triagem sistemática baseada em biologia de sistemas da via AMPK" | **NÃO SUPORTADA** — a triagem que encontrou NQO1 não foi restrita à via AMPK |
-| 11 | "dentre os alvos desregulados identificados no rastreio da via, destaca-se o gene NQO1" | **FALSA** — NQO1 NÃO foi identificado no rastreio da via AMPK |
+| 10 | "triagem sistemática baseada em biologia de sistemas da via AMPK" | **NÃO SUPORTADA**, a triagem que encontrou NQO1 não foi restrita à via AMPK |
+| 11 | "dentre os alvos desregulados identificados no rastreio da via, destaca-se o gene NQO1" | **FALSA**, NQO1 NÃO foi identificado no rastreio da via AMPK |
 
 ### Métodos
 
 | # | Frase | Classificação |
 |---|-------|--------------|
-| 12 | "análise estatística de expressão diferencial [...] pacotes GEOquery e limma" | **IRREPRODUZÍVEL** — Não está no script.R |
-| 13 | "ajuste de p-valor pela taxa de falsa descoberta (FDR, significância para padj < 0,05)" | PARCIALMENTE CORRETA — existe nos outputs, mas o código não está no script.R |
-| 14 | "filtrados no STRING utilizando um escore de confiança restritivo mínimo de 700" | CORRETA — o arquivo é `.min700.txt.gz` |
+| 12 | "análise estatística de expressão diferencial [...] pacotes GEOquery e limma" | **IRREPRODUZÍVEL**, Não está no script.R |
+| 13 | "ajuste de p-valor pela taxa de falsa descoberta (FDR, significância para padj < 0,05)" | PARCIALMENTE CORRETA, existe nos outputs, mas o código não está no script.R |
+| 14 | "filtrados no STRING utilizando um escore de confiança restritivo mínimo de 700" | CORRETA, o arquivo é `.min700.txt.gz` |
 | 15 | "modelagem topológica da rede proteína-proteína (PPI) foi executada via pacote igraph" | CORRETA |
-| 16 | "gene NQO1 isolado na triagem foi submetido à varredura de perturbações transcricionais no DGB" | PARCIALMENTE CORRETA — o DGB foi usado, mas a "triagem" não isolou NQO1 da via AMPK |
-| 17 | "computou-se um escore analítico customizado" | CORRETA — `score = -log10(q) × |FC|` |
+| 16 | "gene NQO1 isolado na triagem foi submetido à varredura de perturbações transcricionais no DGB" | PARCIALMENTE CORRETA, o DGB foi usado, mas a "triagem" não isolou NQO1 da via AMPK |
+| 17 | "computou-se um escore analítico customizado" | CORRETA, `score = -log10(q) × |FC|` |
 
 ### Resultados e Discussão
 
 | # | Frase | Classificação |
 |---|-------|--------------|
-| 18 | "triagem transcriptômica inicial sinalizou alterações marcantes na expressão de fatores moleculares constituintes da via da AMPK" | PARCIALMENTE CORRETA — há DEGs na via, mas GSEA não significativo |
-| 19 | "gene NQO1 despontou como um componente periférico estratégico" | **INCONSISTENTE** — NQO1 não está na via AMPK, não pode "despontar" dela |
-| 20 | "sua desregulação em pacientes com CMD correlaciona-se com o estresse miocárdico" | **ESPECULATIVA** — não há análise de correlação NQO1 × estresse |
-| 21 | "capacidade biológica intrínseca de ligar o controle metabólico da AMPK ao tamponamento de radicais livres" | **ESPECULATIVA** — inferência sem dados |
-| 22 | "Geldanamicina e o Wortmannin induzem expressiva elevação transcricional sobre o NQO1" | **FALSA** — ambos são DOWNREGULADORES |
-| 23 | "doxorrubicina demonstrou associação estatisticamente significante como indutor direto da transcrição de NQO1 (q-value = 6,32 10 e-6)" | **FALSA DUPLA** — direção errada E q-value falso |
-| 24 | "registrando maior estabilidade regulatória na concentração de 10" | **INCOMPLETA** — 10 µM, faltou unidade |
-| 25 | "indução transcriptômica sugere a ativação de uma via adaptativa miocárdica" | **FALSA** — a direção é de repressão, não indução |
+| 18 | "triagem transcriptômica inicial sinalizou alterações marcantes na expressão de fatores moleculares constituintes da via da AMPK" | PARCIALMENTE CORRETA, há DEGs na via, mas GSEA não significativo |
+| 19 | "gene NQO1 despontou como um componente periférico estratégico" | **INCONSISTENTE**, NQO1 não está na via AMPK, não pode "despontar" dela |
+| 20 | "sua desregulação em pacientes com CMD correlaciona-se com o estresse miocárdico" | **ESPECULATIVA**, não há análise de correlação NQO1 × estresse |
+| 21 | "capacidade biológica intrínseca de ligar o controle metabólico da AMPK ao tamponamento de radicais livres" | **ESPECULATIVA**, inferência sem dados |
+| 22 | "Geldanamicina e o Wortmannin induzem expressiva elevação transcricional sobre o NQO1" | **FALSA**, ambos são DOWNREGULADORES |
+| 23 | "doxorrubicina demonstrou associação estatisticamente significante como indutor direto da transcrição de NQO1 (q-value = 6,32 10 e-6)" | **FALSA DUPLA**, direção errada E q-value falso |
+| 24 | "registrando maior estabilidade regulatória na concentração de 10" | **INCOMPLETA**, 10 µM, faltou unidade |
+| 25 | "indução transcriptômica sugere a ativação de uma via adaptativa miocárdica" | **FALSA**, a direção é de repressão, não indução |
 
 ### Conclusões
 
@@ -422,13 +422,13 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 |---|-------|--------------|
 | 26 | "triagem transcriptômica em ambiente computacional permitiu selecionar o gene NQO1" | PARCIALMENTE CORRETA |
 | 27 | "NQO1 como um elemento metabólico periférico e protetor relevante na fisiopatologia da CMD" | **ESPECULATIVA** |
-| 28 | "doxorrubicina atua como um regulador transcricional positivo da expressão de NQO1" | **FALSA** — é downreguladora |
-| 29 | "indicando o acionamento de um mecanismo compensatório homeostático celular de proteção redox" | **FALSA** — premissa errada (down, não up) |
+| 28 | "doxorrubicina atua como um regulador transcricional positivo da expressão de NQO1" | **FALSA**, é downreguladora |
+| 29 | "indicando o acionamento de um mecanismo compensatório homeostático celular de proteção redox" | **FALSA**, premissa errada (down, não up) |
 | 30 | "fornecem insumos conceituais para balizar ações preventivas de farmacovigilância" | **EXAGERADA** |
 
 ---
 
-## ETAPA 10 — FALÁCIAS E VIESES IDENTIFICADOS
+## ETAPA 10, FALÁCIAS E VIESES IDENTIFICADOS
 
 ### 10.1 Falácia ecológica
 - **Dados de linhagens tumorais** (MCF7 = câncer de mama, PC3 = próstata, VCAP = próstata) são usados para inferir comportamento de **cardiomiócitos humanos**. O microambiente celular, perfil epigenético e vias de sinalização são completamente diferentes.
@@ -457,29 +457,29 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 
 ---
 
-## ETAPA 11 — AUDITORIA DAS REFERÊNCIAS
+## ETAPA 11, AUDITORIA DAS REFERÊNCIAS
 
 | Ref | Tema | Suporta? | Observação |
 |-----|------|----------|------------|
-| [1] BOZKURT, 2021 — CMD review | ✅ Parcialmente | Contexto geral de CMD |
-| [2] RAMACCINI, 2021 — Mitochondrial function in DCM | ✅ Parcialmente | Mitocôndria em CMD |
-| [3] MARTINS, 2022 — Oxidative stress in cardiac remodeling | ✅ Parcialmente | Estresse oxidativo |
-| [4] HERZIG & SHAW, 2018 — AMPK review | ✅ | AMPK, mas não conecta com NQO1 |
-| [5] ROSS & SIEGEL, 2017 — NQO1 functions | ✅ | Papel do NQO1 |
-| [6] HODOS, 2016 — In silico drug repurposing | ✅ | Métodos in silico |
-| [7] WALLACE, 2003 — Doxorubicin cardiotoxicity | ✅ Parcialmente | Doxorrubicina, mas artigo de 2003 |
-| [8] WANG, 2021 — Drug Gene Budger | ✅ | Ferramenta DGB |
-| [9] EKINS, 2019 — ML for drug discovery | ⚠️ Fraca | Não diretamente relacionado |
-| [10] ZANGIROLAMI-RAIMUNDO, 2018 — Estudos transversais | ⚠️ Fraca | Metodologia geral, não específica |
-| [11] COSTA, 2026 — Resultados de bioinformática IFF | ⚠️ Não verificável | Publicação interna |
-| [12] LOPES-JÚNIOR, 2021 — Personalized nursing | ⚠️ Tangencial | Enfermagem de precisão |
-| [13] SOUZA & PARDINI, 2016 — Carbono pirolítico | 🔴 **TOTALMENTE DESCONEXA** | **Engenharia de materiais. Zero relação com o tema.** |
+| [1] BOZKURT, 2021, CMD review | ✅ Parcialmente | Contexto geral de CMD |
+| [2] RAMACCINI, 2021, Mitochondrial function in DCM | ✅ Parcialmente | Mitocôndria em CMD |
+| [3] MARTINS, 2022, Oxidative stress in cardiac remodeling | ✅ Parcialmente | Estresse oxidativo |
+| [4] HERZIG & SHAW, 2018, AMPK review | ✅ | AMPK, mas não conecta com NQO1 |
+| [5] ROSS & SIEGEL, 2017, NQO1 functions | ✅ | Papel do NQO1 |
+| [6] HODOS, 2016, In silico drug repurposing | ✅ | Métodos in silico |
+| [7] WALLACE, 2003, Doxorubicin cardiotoxicity | ✅ Parcialmente | Doxorrubicina, mas artigo de 2003 |
+| [8] WANG, 2021, Drug Gene Budger | ✅ | Ferramenta DGB |
+| [9] EKINS, 2019, ML for drug discovery | ⚠️ Fraca | Não diretamente relacionado |
+| [10] ZANGIROLAMI-RAIMUNDO, 2018, Estudos transversais | ⚠️ Fraca | Metodologia geral, não específica |
+| [11] COSTA, 2026, Resultados de bioinformática IFF | ⚠️ Não verificável | Publicação interna |
+| [12] LOPES-JÚNIOR, 2021, Personalized nursing | ⚠️ Tangencial | Enfermagem de precisão |
+| [13] SOUZA & PARDINI, 2016, Carbono pirolítico | 🔴 **TOTALMENTE DESCONEXA** | **Engenharia de materiais. Zero relação com o tema.** |
 
 **Referência [13] é uma contaminação de outro trabalho.** "Identificação do Tipo de Carbono Pirolítico por Meio da Técnica do Ângulo de Extinção" é sobre engenharia de materiais no ITA/IAE. Foi colada indevidamente.
 
 ---
 
-## ETAPA 12 — CONSISTÊNCIA INTERNA
+## ETAPA 12, CONSISTÊNCIA INTERNA
 
 ### Inconsistências entre seções do paper
 
@@ -495,7 +495,7 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 
 ---
 
-## ETAPA 13 — CORREÇÕES SUGERIDAS
+## ETAPA 13, CORREÇÕES SUGERIDAS
 
 ### Correção 1: q-value da doxorrubicina
 
@@ -509,7 +509,7 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 ### Correção 2: Direção da regulação da doxorrubicina
 
 **Problema**: Paper diz "upregulation", dados mostram "downregulation"
-**Impacto**: CRÍTICO — Invalida toda a discussão e conclusão
+**Impacto**: CRÍTICO, Invalida toda a discussão e conclusão
 **Novo texto**:
 > "A doxorrubicina demonstrou associação estatisticamente significante como **repressor transcricional** de NQO1 (Fold Change médio = −0,315 no CREEDS e −2,565 no LINCS L1000; q-value mínimo = 2,21×10⁻²⁸), indicando que esta antraciclina **suprime** a expressão de NQO1 em modelos celulares, o que pode exacerbar a vulnerabilidade ao estresse oxidativo."
 
@@ -548,9 +548,9 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 
 ---
 
-## ETAPA 14 — AVALIAÇÃO DE CREDIBILIDADE CIENTÍFICA
+## ETAPA 14, AVALIAÇÃO DE CREDIBILIDADE CIENTÍFICA
 
-| Critério | Nota (0–10) | Justificativa |
+| Critério | Nota (0-10) | Justificativa |
 |----------|-------------|---------------|
 | Originalidade | 5 | Análise farmacogenômica de NQO1 é relevante, mas abordagem é padrão |
 | Metodologia | 2 | Script principal não contém etapas-chave; irreproduzível |
@@ -569,9 +569,9 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 
 ---
 
-## ETAPA 15 — PARECER FINAL (FORMATO NATURE REVIEWER)
+## ETAPA 15, PARECER FINAL (FORMATO NATURE REVIEWER)
 
-### RECOMMENDATION: ❌ REJECT — MAJOR REVISION REQUIRED BEFORE RESUBMISSION
+### RECOMMENDATION: ❌ REJECT, MAJOR REVISION REQUIRED BEFORE RESUBMISSION
 
 ---
 
@@ -604,15 +604,15 @@ O script.R cobre apenas pós-processamento. As etapas de GEOquery, limma, GSEA, 
 
 ### ERROS GRAVES (COMPROMETEM A CREDIBILIDADE)
 
-**G1.** GSEA da via AMPK não significativo (p=0,125, padj=0,419) — omitido do paper
+**G1.** GSEA da via AMPK não significativo (p=0,125, padj=0,419), omitido do paper
 
-**G2.** Referência [13] é de engenharia de materiais (carbono pirolítico) — completamente desconexa
+**G2.** Referência [13] é de engenharia de materiais (carbono pirolítico), completamente desconexa
 
 **G3.** Afirmações de "farmacovigilância", "enfermagem de precisão" e "cardiologia translacional" são exageros translacionais sem suporte
 
 **G4.** Ranking top 5 real (trichostatin A, doxorubicin, manumycin-a, parthenolide, panobinostat) não é discutido
 
-**G5.** `pubchem_results_with_names.csv` vazio — mapeamento PubChem não gerou resultados nomeados
+**G5.** `pubchem_results_with_names.csv` vazio, mapeamento PubChem não gerou resultados nomeados
 
 ---
 

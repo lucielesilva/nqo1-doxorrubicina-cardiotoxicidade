@@ -1,11 +1,11 @@
 # Auditoria NQO1/PubChem/PPI
 
-- Data: 2026-08-12 20:07:18
-- Raiz: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/CMC
-- Fonte unica dos farmacos: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/CMC/output/tables/nqo1/DGB_results_NQO1.xlsx
+- Data: 2026-10-12 10:10:23
+- Raiz: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/NQO1/nqo1-doxorrubicina-cardiotoxicidade
+- Fonte única dos fármacos: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/NQO1/nqo1-doxorrubicina-cardiotoxicidade/output/tables/nqo1/dgb_resultados_nqo1.xlsx
 - Abas processadas: cmap_results_up, l1000_results_up, creeds_results_up, cmap_results_down, l1000_results_down, creeds_results_down
 - Linhas NQO1 validas: 3523
-- Farmacos unicos (pos-unificacao case-insensitive): 1266
+- Fármacos únicos (pos-unificacao case-insensitive): 1266
 - Downreguladores: 668 ( 52.8 %)
 - Upreguladores: 598 ( 47.2 %)
 - LINCS L1000: 1206 ( 95.3 %)
@@ -14,16 +14,16 @@
 - Multi-plataforma: 21 ( 1.7 %)
 - Top 1: trichostatin A
 - Doxorubicin no ranking: sim
-- Doxorubicin direcao: Downregula NQO1 | mean_fc: -1.065 | min_q: 2.21e-28
-- Volcano revisado: q-values iguais a zero capados em -log10(q)=50.
-- Boxplot top drugs removido conforme solicitado.
-- PCA removido conforme solicitado.
-- Tabela top20 preservada como tabela: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/CMC/output/tables/nqo1/top20_drugs_NQO1.csv
-- Grafico top20_drugs_NQO1 removido conforme solicitado.
-- Unificacao case-insensitive aplicada no ranking (ex: Doxorubicin + doxorubicin).
-- Figuras NQO1: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/CMC/output/figures/nqo1_drug_regulation
-- Figura PPI: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/CMC/output/figures/ppi/PPI_AMPK_network.png
-- Log estruturado: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/CMC/output/audit/audit_events_nqo1_pubchem_ppi.csv
+- Doxorubicin direção: Downregula NQO1 | mean_fc: -1.065 | min_q: 2.21e-28
+- Volcano revisado: q-values iguais a zero capados em -log10(q) = 50.
+- Boxplot top drugs removido.
+- PCA removido.
+- Tabela top20 preservada como tabela: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/NQO1/nqo1-doxorrubicina-cardiotoxicidade/output/tables/nqo1/top20_farmacos_nqo1.csv
+- Gráfico top20_drugs_NQO1 removido.
+- Unificacao case-insensitive aplicada no ranking.
+- Figuras NQO1: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/NQO1/nqo1-doxorrubicina-cardiotoxicidade/output/figures/nqo1_drug_regulation
+- Figura PPI: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/NQO1/nqo1-doxorrubicina-cardiotoxicidade/output/figures/ppi/rede_ppi_ampk.png
+- Log estruturado: C:/Users/oorie/OneDrive/Documentos/TRABALHOS/NQO1/nqo1-doxorrubicina-cardiotoxicidade/output/audit/eventos_de_auditoria.csv
 
 ## Top 20
 # A tibble: 20 × 6

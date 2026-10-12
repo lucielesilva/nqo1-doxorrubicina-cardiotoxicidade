@@ -1,12 +1,12 @@
 ---
-title: "QC Report — NQO1 / Cardiotoxicidade por Doxorrubicina"
+title: "Controle de Qualidade da Expressão no GSE116250"
 format: html
 execute:
   echo: false
   warning: false
 ---
 
-# Controle de Qualidade — Expressão (GSE116250)
+# Controle de Qualidade da Expressão (GSE116250)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.width = 9, fig.height = 6)
@@ -29,7 +29,7 @@ expr <- as.data.frame(lapply(expr, as.numeric))
 rownames(expr) <- rpkm$Common_name
 
 # Metadados
-pheno <- read.csv("output/tables/ampk/pheno_data_raw.csv", check.names = FALSE)
+pheno <- read.csv("output/tables/ampk/metadados_das_amostras.csv", check.names = FALSE)
 pheno <- pheno |>
   dplyr::select(title, `disease:ch1`, `Sex:ch1`, `age:ch1`) |>
   dplyr::rename(sample = title, group = `disease:ch1`, sex = `Sex:ch1`, age = `age:ch1`)
@@ -53,7 +53,7 @@ ggplot(expr_long, aes(x = sample, y = expr + 1, fill = group)) +
         legend.position = "bottom")
 ```
 
-## 3. Boxplot depois da normalização (log2(CPM/TMM) — sugerida)
+## 3. Boxplot depois da normalização (log2(CPM/TMM), sugerida)
 
 ```{r box-after, fig.height=7}
 # Transformação reprodutível sugerida (config.yaml: normalization = log2-TMM)
@@ -84,7 +84,7 @@ pca_df <- data.frame(sample = rownames(expr_t), PC1 = pca$x[, 1], PC2 = pca$x[, 
 
 ggplot(pca_df, aes(x = PC1, y = PC2, color = group, shape = sex)) +
   geom_point(size = 2.4) +
-  labs(title = "PCA — amostras GSE116250",
+  labs(title = "PCA das amostras GSE116250",
        x = paste0("PC1 (", round(100 * summary(pca)$importance[2, 1], 1), "%)"),
        y = paste0("PC2 (", round(100 * summary(pca)$importance[2, 2], 1), "%)")) +
   theme_minimal(base_size = 12) +
@@ -111,4 +111,4 @@ ggplot(detected, aes(x = sample, y = pct_detected, fill = group)) +
 
 ---
 
-*Gerado automaticamente para auditoria de QC. Ver `AUDIT_REPORT.md` para os limiares configurados em `config.yaml`.*
+*Gerado automaticamente para auditoria de QC. Ver `AUDITORIA_DE_DADOS.md` para os limiares configurados em `config.yaml`.*

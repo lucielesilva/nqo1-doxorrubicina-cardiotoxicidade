@@ -1,14 +1,14 @@
 Package: nqo1-doxorrubicina-cardiotoxicidade
-Title: Ranqueamento Farmacogenomico in silico de Farmacos Moduladores da Expressao de NQO1
+Title: Análise Integrativa de Transcriptômica e Farmacogenômica do NQO1 na Cardiotoxicidade por Doxorrubicina
 Version: 1.0.0
 Authors@R: c(
     person("L. P.", "Souza", role = c("aut", "cre"), email = "luciele.s@gsuite.iff.edu.br"),
     person("R. P.", "Santos", role = "aut"),
     person("P. A.", "Borges", role = "aut")
     )
-Description: Pipeline reprodutivel para analise de expressao diferencial (GSE116250),
-    caracterizacao da via AMPK (hsa04152), identificacao do gene NQO1 e ranqueamento
-    farmacogenomico de farmacos moduladores de NQO1 via Drug Gene Budger (CMAP, LINCS L1000, CREEDS).
+Description: Pipeline reprodutível para análise de expressão diferencial (GSE116250),
+    caracterização da via AMPK (hsa04152), identificação do gene NQO1 e ranqueamento
+    farmacogenômico de fármacos moduladores de NQO1 via Drug Gene Budger (CMAP, LINCS L1000, CREEDS).
 License: file LICENSE
 Encoding: UTF-8
 Depends:
