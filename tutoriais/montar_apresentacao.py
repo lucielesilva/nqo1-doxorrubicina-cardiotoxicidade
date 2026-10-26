@@ -134,8 +134,7 @@ def tabela(slide, cabecalho, linhas, l, t, larguras, size=13, altura=0.32):
 def novo(prs, titulo_txt, sub=None, numero=None, total=None, notas=None):
     s = prs.slides.add_slide(prs.slide_layouts[6])
     titulo(s, titulo_txt, sub)
-    if numero:
-        rodape(s, numero, total)
+    FOOTER.append(len(prs.slides))
     if notas:
         s.notes_slide.notes_text_frame.text = notas
     return s
@@ -179,6 +178,7 @@ via_down = len(via_signif) - via_up
 prs = Presentation()
 prs.slide_width, prs.slide_height = W, H
 TOTAL = 31
+FOOTER = []
 
 # 1 ----------------------------------------------------------------- capa
 s = prs.slides.add_slide(prs.slide_layouts[6])
@@ -249,6 +249,80 @@ tabela(s, ["Mecanismo", "O que acontece"],
        M, Inches(1.85), [Inches(3.6), Inches(8.3)], size=14, altura=0.72)
 txt(s, "Consequência comum: menos defesa antioxidante e mais vulnerabilidade ao dano.",
     M, Inches(5.6), Inches(11.5), Inches(0.5), size=16, bold=True, color=TEAL)
+
+# 5a ---------------------------------------------------------------- Kong Fig 1
+s = novo(prs, "O ciclo redox da doxorrubicina", sub="Kong et al., 2022 — Fig. 1",
+         notas=("A figura tem cinco painéis. A e B: ciclo redox da quinona com NOX2/NOX4, "
+                "xantina oxidase e eNOS/iNOS gera superóxido, peroxinitrito e radical hidroxila. "
+                "C: no retículo sarcoplasmático, ROS ativam CaMKII. D: inibição de topoisomerase "
+                "II-beta leva a quebras de mtDNA e queda de ATP. E: bloqueio do fluxo autofágico "
+                "pela falha de acidificação lisossomal."))
+figura(s, "artigos/Kong_2022_Fig1_estresse_oxidativo.png", M, Inches(1.45),
+       Inches(4.9), Inches(5.25), "Kong et al., 2022, Int J Biol Sci")
+bullets(s, [
+    "A · A quinona da DOX entra em ciclo redox com NOX2, NOX4 e xantina oxidase.",
+    "A · Surge a semiquinona, que reduz O2 e produz superóxido (O2\u2022-).",
+    "B · A SOD converte O2\u2022- em H2O2; com Fe2+ (Fenton) vem o radical hidroxila.",
+    "B · Óxido nítrico + superóxido = peroxinitrito (ONOO-).",
+    "C/D · ROS ativam CaMKII no retículo; a inibição de topo-II\u03b2 quebra o mtDNA.",
+    "E · A DOX bloqueia a acidificação lisossomal e trava o fluxo autofágico.",
+], M + Inches(5.25), Inches(1.6), Inches(6.6), Inches(5.0), size=14, space=9)
+
+# 5b ---------------------------------------------------------------- Kong Fig 2
+s = novo(prs, "Três mortes clássicas induzidas pela DOX",
+         sub="Apoptose, piroptose e ferroptose — Kong et al., 2022, Fig. 2",
+         notas=("Painel A: apoptose, com PARP e p53 acionando caspases. Painel B: piroptose via "
+                "TLR4/NLRP3 e caspase-1, com GSDMD/GSDME formando poros. Painel C: ferroptose, "
+                "dependente de Fe2+ e peroxidação lipídica, contida por GPX4/system Xc- e GSH."))
+figura(s, "artigos/Kong_2022_Fig2_morte_celular.png", M, Inches(1.45),
+       Inches(11.9), Inches(3.85))
+bullets(s, [
+    "A · Apoptose: quebras de DNA ativam PARP e p53, que acionam caspases.",
+    "B · Piroptose: TLR4 leva ao inflamassoma NLRP3 e à caspase-1; GSDMD abre poros na membrana.",
+    "C · Ferroptose: Fe2+ e peroxidação lipídica; GPX4, system Xc- e GSH tentam conter.",
+], M, Inches(5.45), Inches(11.9), Inches(1.7), size=14, space=7)
+
+# 5c ---------------------------------------------------------------- Rodrigues Fig 1
+s = novo(prs, "As 25 formas de morte celular regulada",
+         sub="Rodrigues De Souza et al., 2025 — Fig. 1",
+         notas=("Tabela com as 25 formas de morte celular regulada e a definição operacional de cada "
+                "uma. Útil para mostrar que apoptose, necroptose, piroptose, ferroptose, cobreptose, "
+                "oxeiptose e outras são categorias distintas, com mecanismos próprios."))
+figura(s, "artigos/Rodrigues_2025_Fig1_25_mortes_celulares.png", M, Inches(1.38),
+       Inches(11.9), Inches(5.1),
+       "RCD = regulated cell death: forma de morte e definição operacional")
+
+# 5d ---------------------------------------------------------------- Rodrigues Fig 3
+s = novo(prs, "Multioptose: as vias conversam entre si",
+         sub="Rodrigues De Souza et al., 2025 — Fig. 3",
+         notas=("O modelo integrado calcula escores das 25 vias de morte por amostra e usa isso "
+                "para buscar biomarcadores e alvos terapêuticos em pan-cancer. A mensagem central: "
+                "as vias se comunicam e bloquear uma pode desviar a célula para outra."))
+figura(s, "artigos/Rodrigues_2025_Fig3_workflow_multioptose.png", M, Inches(1.45),
+       Inches(7.3), Inches(5.1), "Fluxo do modelo integrado de multioptose")
+bullets(s, [
+    "O modelo soma escores das 25 vias de morte, amostra por amostra.",
+    "Integra camadas de multi-ômica para achar biomarcadores e alvos.",
+    "As vias se comunicam: bloquear uma pode desviar a célula para outra.",
+], M + Inches(7.6), Inches(1.9), Inches(4.7), Inches(3.2), size=15, space=10)
+
+# 5e ---------------------------------------------------------------- NQO1 na historia
+s = novo(prs, "Onde o NQO1 entra nessa história",
+         sub="A enzima corta o ciclo redox na origem",
+         notas=("Amarrar as figuras dos artigos ao achado do estudo: o NQO1 reduz a quinona em dois "
+                "elétrons, evitando a semiquinona que alimenta o ciclo redox. Com NQO1 baixo na DCM, "
+                "a mesma dose de DOX encontra menos defesa."))
+tabela(s, ["Etapa", "Com DOX e pouco NQO1", "Com NQO1 ativo"],
+       [["Ciclo redox", "Semiquinona recicla e gera superóxido sem parar",
+         "Redução em dois elétrons: sem semiquinona"],
+        ["Radicais", "H2O2, \u2022OH e ONOO- atacam proteína, lipídio e DNA",
+         "Menos ROS e menos peroxidação lipídica"],
+        ["Ferroptose", "Fe2+ + peroxidação lipídica levam à morte por ferro",
+         "Menos peroxidação: menos sinal ferroptótico"],
+        ["Resultado", "Morte do cardiomiócito", "Mais resistência ao dano"]],
+       M, Inches(1.8), [Inches(2.5), Inches(4.9), Inches(4.5)], size=13, altura=0.66)
+txt(s, "Na DCM o NQO1 cai: a defesa antioxidante diminui justamente onde a DOX age.",
+    M, Inches(5.3), Inches(11.5), Inches(0.9), size=17, bold=True, color=TEAL)
 
 # 6 ----------------------------------------------------------------- NQO1
 s = novo(prs, "NQO1: a enzima que detoxifica quinonas", numero=6, total=TOTAL, notas=(
@@ -541,14 +615,20 @@ s = novo(prs, "Referências", numero=31, total=TOTAL,
          notas="Citar as fontes dos dados e dos métodos. Ver README.md para a lista completa.")
 bullets(s, [
     "GEO: GSE116250 (transcriptoma de ventrículo esquerdo humano).",
+    "Kong et al. (2022) Underlying the mechanisms of doxorubicin-induced acute cardiotoxicity. Int J Biol Sci.",
+    "Rodrigues De Souza et al. (2025) Integrated multi-optosis model for pan-cancer discovery.",
     "Ritchie et al. (2015) limma. Nucleic Acids Research.",
     "Szklarczyk et al. (2021) STRING. Nucleic Acids Research.",
-    "Hänzelmann et al. (2013) GSVA. BMC Bioinformatics.",
-    "Korotkevich et al. (2021) fgsea. bioRxiv.",
+    "Hänzelmann et al. (2013) GSVA. BMC Bioinformatics; Korotkevich et al. (2021) fgsea. bioRxiv.",
     "Leek et al. (2012) sva. Bioinformatics; Aran et al. (2017) xCell. Genome Biology.",
-], M, Inches(1.85), Inches(11.8), Inches(3.6), size=15, space=8)
-txt(s, "Lista completa e detalhes em README.md e RELATORIO_CIENTIFICO.md",
-    M, Inches(5.9), Inches(11.5), Inches(0.4), size=12, italic=True, color=GRAY)
+], M, Inches(1.8), Inches(11.8), Inches(4.4), size=14, space=7)
+txt(s, "Textos completos em tutoriais/artigos/. Lista detalhada em README.md.",
+    M, Inches(6.35), Inches(11.5), Inches(0.35), size=12, italic=True, color=GRAY)
+
+# numeracao automatica das paginas: so slides de conteudo recebem rodape
+total_slides = len(prs.slides)
+for indice in FOOTER:
+    rodape(prs.slides[indice - 1], indice, total_slides)
 
 prs.save(OUT)
 print("slides:", len(prs.slides))

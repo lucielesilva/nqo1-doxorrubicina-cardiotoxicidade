@@ -18,10 +18,15 @@ A regra da pasta é simples: **o número do arquivo é a ordem de execução**.
 
 ## Apresentação
 
-`APRESENTACAO_NQO1_TUTORIAIS.pptx` é a apresentação usada em sala: **31 slides**,
+`APRESENTACAO_NQO1_TUTORIAIS.pptx` é a apresentação usada em sala: **36 slides**,
 formato 16:9, com **texto, tabelas e figuras editáveis** e notas do apresentador
 em cada slide. Ela abre normalmente no PowerPoint, no LibreOffice Impress e no
 **Google Apresentações** (basta importar o arquivo no Drive).
+
+Os slides de mecanismos usam as figuras dos artigos em `tutoriais/artigos/`:
+Kong et al. (2022), Fig. 1 (ciclo redox e estresse oxidativo) e Fig. 2
+(apoptose, piroptose e ferroptose); Rodrigues De Souza et al. (2025), Fig. 1
+(as 25 formas de morte celular regulada) e Fig. 3 (modelo de multioptose).
 
 Os números e as figuras dos slides vêm das tabelas em `output/tables/` e das
 imagens em `output/figures/`. Se você rodar a análise de novo e os valores
