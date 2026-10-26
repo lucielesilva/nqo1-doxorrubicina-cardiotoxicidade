@@ -32,4 +32,9 @@ Suggests:
     fgsea,
     GEOquery,
     BiocManager,
-    renv
+    renv,
+    uwot,
+    sva,
+    xCell,
+    ggforce,
+    pheatmap
