@@ -18,7 +18,7 @@ A regra da pasta é simples: **o número do arquivo é a ordem de execução**.
 
 ## Apresentação
 
-`APRESENTACAO_NQO1_TUTORIAIS.pptx` é a apresentação usada em sala: **50 slides**,
+`APRESENTACAO_NQO1_TUTORIAIS.pptx` é a apresentação usada em sala: **51 slides**,
 formato 16:9, com **texto, tabelas e figuras editáveis**, texto alternativo nas
 figuras e notas do apresentador em cada slide. Ela abre normalmente no
 PowerPoint, no LibreOffice Impress e no **Google Apresentações** (basta importar

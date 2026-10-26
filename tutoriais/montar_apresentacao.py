@@ -387,6 +387,26 @@ tabela(s, ["Frente", "O que se faz"],
         ["NQO1 na prática", "Candidato a marcador de susceptibilidade: menos enzima, menos defesa"]],
        M, Inches(1.85), [Inches(3.0), Inches(9.1)], size=14, altura=0.74)
 
+# 5g ---------------------------------------------------------------- evidencia
+s = novo(prs, "O que a evidência recomenda",
+         sub="Gajjar et al., 2026 — Biomedicines 14:1771",
+         notas=("Slide de fundamentacao clinica. Cada linha vem do artigo de Gajjar et al. (2026), "
+                "revisao de estratificacao de risco e vigilancia em cardio-oncologia: GLS com queda "
+                "relativa >15 por cento, troponina elevada ~4x risco, limiares de dose do NCI/COG e "
+                "ASCO, e dexrazoxano como quelante de ferro cardioprotetor."))
+tabela(s, ["Frente", "O que a evidência mostra"],
+       [["Rastreio de disfunção",
+         "FEVE + GLS antes de iniciar terapia cardiotóxica (Classe I da ESC); queda relativa de GLS > 15% prediz queda posterior da FEVE"],
+        ["Troponina e BNP",
+         "Elevação de troponina durante a quimioterapia confere cerca de 4x mais risco de cardiotoxicidade; BNP/NT-proBNP se associam a risco de insuficiência cardíaca"],
+        ["Dose cumulativa",
+         "NCI/COG: até 250 mg/m² de doxorrubicina equivalente = risco moderado; acima de 250 mg/m² = alto risco de IC. ASCO: > 100 mg/m² com > 15 Gy = alto risco"],
+        ["Cardioproteção",
+         "Dexrazoxano, quelante de ferro, tem efeito cardioprotetor; pode agir também por HIF e por inibir a interação antraciclina–Top2β"]],
+       M, Inches(1.8), [Inches(3.0), Inches(9.0)], size=13, altura=0.9)
+txt(s, "Gajjar A, et al. Biomedicines. 2026;14(8):1771. doi:10.3390/biomedicines14081771 (PMC13509971)",
+    M, Inches(6.35), Inches(11.5), Inches(0.35), size=11, italic=True, color=GRAY)
+
 # 6 ----------------------------------------------------------------- NQO1
 s = novo(prs, "NQO1: a enzima que detoxifica quinonas", numero=6, total=TOTAL, notas=(
     "NQO1 é NAD(P)H quinona oxidorredutase 1. Faz redução de dois elétrons, evitando a "
@@ -804,6 +824,7 @@ s = novo(prs, "Referências", numero=31, total=TOTAL,
 bullets(s, [
     "GEO: GSE116250 (transcriptoma de ventrículo esquerdo humano).",
     "Kong et al. (2022) Underlying the mechanisms of doxorubicin-induced acute cardiotoxicity. Int J Biol Sci.",
+    "Gajjar et al. (2026) Cardiovascular risk stratification and surveillance in cardio-oncology. Biomedicines 14:1771.",
     "Rodrigues De Souza et al. (2025) Integrated multi-optosis model for pan-cancer discovery.",
     "Ritchie et al. (2015) limma. Nucleic Acids Research.",
     "Szklarczyk et al. (2021) STRING. Nucleic Acids Research.",
