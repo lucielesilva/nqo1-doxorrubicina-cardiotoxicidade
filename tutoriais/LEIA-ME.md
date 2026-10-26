@@ -18,10 +18,16 @@ A regra da pasta é simples: **o número do arquivo é a ordem de execução**.
 
 ## Apresentação
 
-`APRESENTACAO_NQO1_TUTORIAIS.pptx` é a apresentação usada em sala: **36 slides**,
-formato 16:9, com **texto, tabelas e figuras editáveis** e notas do apresentador
-em cada slide. Ela abre normalmente no PowerPoint, no LibreOffice Impress e no
-**Google Apresentações** (basta importar o arquivo no Drive).
+`APRESENTACAO_NQO1_TUTORIAIS.pptx` é a apresentação usada em sala: **50 slides**,
+formato 16:9, com **texto, tabelas e figuras editáveis**, texto alternativo nas
+figuras e notas do apresentador em cada slide. Ela abre normalmente no
+PowerPoint, no LibreOffice Impress e no **Google Apresentações** (basta importar
+o arquivo no Drive).
+
+Blocos da apresentação: objetivos e glossário → contexto clínico (DOX,
+mecanismos, morte celular, NQO1, cardioproteção) → dados e métodos → resultados
+transcriptômicos (UMAP, volcano, NQO1, heatmap) → do gene ao sistema → via e
+robustez → farmacogenômica → conclusões, discussão e referências.
 
 Os slides de mecanismos usam as figuras dos artigos em `tutoriais/artigos/`:
 Kong et al. (2022), Fig. 1 (ciclo redox e estresse oxidativo) e Fig. 2

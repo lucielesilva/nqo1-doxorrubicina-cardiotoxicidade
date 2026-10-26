@@ -91,7 +91,9 @@ def figura(slide, nome, l, t, w, h, legenda=None):
         iw, ih = im.size
     escala = min(w / iw, h / ih)
     pw, ph = int(iw * escala), int(ih * escala)
-    slide.shapes.add_picture(caminho, l + int((w - pw) / 2), t + int((h - ph) / 2), pw, ph)
+    pic = slide.shapes.add_picture(caminho, l + int((w - pw) / 2), t + int((h - ph) / 2), pw, ph)
+    # texto alternativo (acessibilidade; o Google Apresentacoes importa este campo)
+    pic._element.nvPicPr.cNvPr.set("descr", legenda or os.path.basename(nome))
     if legenda:
         txt(slide, legenda, l, t + h + Inches(0.03), w, Inches(0.3), size=11,
             italic=True, color=GRAY, align=PP_ALIGN.CENTER)
@@ -175,6 +177,9 @@ via_signif = [r for r in via if float(r["padj"]) < 0.05]
 via_up = sum(1 for r in via_signif if float(r["log2FoldChange"]) > 0)
 via_down = len(via_signif) - via_up
 
+farmacos = read_csv("nqo1/ranking_de_farmacos_nqo1.csv")
+dox_invitro = read_csv("nqo1/resumo_doxorrubicina_nqo1.csv")[0]
+
 prs = Presentation()
 prs.slide_width, prs.slide_height = W, H
 TOTAL = 31
@@ -219,7 +224,34 @@ tabela(s, ["Bloco", "Pergunta que responde", "Script"],
         ["4. Expressão diferencial", "Quais genes mudam entre DCM e controle?", "02_volcano"],
         ["5. Do gene ao sistema", "A via AMPK, a rede PPI e os escores por amostra", "03 a 06"],
         ["6. Robustez e conclusão", "O achado resiste a confundidores?", "06"]],
-       M, Inches(1.85), [Inches(3.3), Inches(6.3), Inches(2.3)], size=14, altura=0.62)
+       M, Inches(1.85), [Inches(3.3), Inches(6.3), Inches(2.3)], size=15, altura=0.62)
+
+# 2b ---------------------------------------------------------------- objetivos
+s = novo(prs, "Objetivos de aprendizagem", notas=(
+    "Dizer o que a turma deve sair sabendo. Estes objetivos guiam o fechamento: "
+    "cada um e retomado nas conclusoes."))
+txt(s, "Ao final da aula, você deve ser capaz de:", M, Inches(1.8), Inches(11.5),
+    Inches(0.45), size=18, bold=True, color=TEAL)
+bullets(s, [
+    "Explicar a função do NQO1 na detoxificação de quinonas e no estresse oxidativo.",
+    "Descrever os mecanismos pelos quais a doxorrubicina lesiona o cardiomiócito.",
+    "Reconhecer as principais formas de morte celular envolvidas na cardiotoxicidade.",
+    "Interpretar um volcano plot e os escores de via (GSEA e GSVA).",
+    "Relacionar o achado transcriptômico aos candidatos farmacológicos.",
+], M, Inches(2.4), Inches(11.7), Inches(3.4), size=18, space=10)
+
+# 2c ---------------------------------------------------------------- glossário
+s = novo(prs, "Glossário rápido", notas=(
+    "Termos que aparecem nos slides seguintes. Vale voltar a este slide sempre que "
+    "algum termo tecnico aparecer."))
+tabela(s, ["Termo", "O que significa"],
+       [["log2FC", "log2 da razão de expressão entre DCM e controle; negativo = menor na DCM"],
+        ["padj", "p-valor ajustado para múltiplas comparações (Benjamini-Hochberg)"],
+        ["RPKM", "medida de expressão normalizada pelo tamanho do gene e pela profundidade"],
+        ["NES", "normalized enrichment score: escore do GSEA, já normalizado por tamanho"],
+        ["GSVA", "transforma a via em um escore por amostra, como um 'supergene'"],
+        ["RCD", "regulated cell death: morte celular regulada, com via molecular própria"]],
+       M, Inches(1.8), [Inches(2.0), Inches(9.9)], size=14, altura=0.62)
 
 # 3 ----------------------------------------------------------------- seção 1
 capa_num(prs, "01", "Contexto clínico", "Doxorrubicina, estresse oxidativo e o papel do NQO1")
@@ -292,6 +324,22 @@ figura(s, "artigos/Rodrigues_2025_Fig1_25_mortes_celulares.png", M, Inches(1.38)
        Inches(11.9), Inches(5.1),
        "RCD = regulated cell death: forma de morte e definição operacional")
 
+# 5c2 --------------------------------------------------------------- tabela RCD
+s = novo(prs, "As mortes que pesam na cardiotoxicidade",
+         sub="Seleção das 25 formas de RCD — Rodrigues De Souza et al., 2025",
+         notas=("Nem todas as 25 formas têm evidência na cardiotoxicidade. Estas são as mais "
+                "estudadas. A tabela é editável; a figura com as 25 serve de referência."))
+tabela(s, ["Forma", "Definição operacional"],
+       [["Apoptose", "Encolhimento celular, condensação da cromatina e fragmentação do DNA, sem inflamação"],
+        ["Necroptose", "Necrose programada via RIPK1/RIPK3/MLKL, com ruptura de membrana e inflamação"],
+        ["Piroptose", "Caspase-1 e gasderminas formam poros na membrana; altamente inflamatória"],
+        ["Ferroptose", "Depende de ferro e peroxidação lipídica; não é apoptótica"],
+        ["Autofagia", "Autodigestão por lisossomos; a DOX trava o fluxo autofágico"],
+        ["Cobreptose", "Morte por acúmulo de cobre e estresse mitocondrial"],
+        ["Oxeiptose", "Dirigida por estresse oxidativo, com KEAP1 e NRF2 — liga direta com o NQO1"],
+        ["Mitoptose", "Eliminação seletiva de mitocôndrias danificadas"]],
+       M, Inches(1.8), [Inches(2.4), Inches(9.5)], size=14, altura=0.55)
+
 # 5d ---------------------------------------------------------------- Rodrigues Fig 3
 s = novo(prs, "Multioptose: as vias conversam entre si",
          sub="Rodrigues De Souza et al., 2025 — Fig. 3",
@@ -323,6 +371,21 @@ tabela(s, ["Etapa", "Com DOX e pouco NQO1", "Com NQO1 ativo"],
        M, Inches(1.8), [Inches(2.5), Inches(4.9), Inches(4.5)], size=13, altura=0.66)
 txt(s, "Na DCM o NQO1 cai: a defesa antioxidante diminui justamente onde a DOX age.",
     M, Inches(5.3), Inches(11.5), Inches(0.9), size=17, bold=True, color=TEAL)
+
+# 5f ---------------------------------------------------------------- clinica
+s = novo(prs, "Cardioproteção e monitorização na prática",
+         sub="O que a oncologia e a enfermagem fazem com esse risco",
+         notas=("Dexrazoxano e quelante de ferro: age exatamente no braco da ferroptose mostrado "
+                "no painel C da Fig. 2 de Kong. Monitorizacao combina funcao ventricular, strain e "
+                "biomarcadores. O risco cresce com a dose cumulativa. O NQO1 entra como possivel "
+                "marcador de susceptibilidade individual."))
+tabela(s, ["Frente", "O que se faz"],
+       [["Cardioproteção", "Dexrazoxano: quelante de ferro, único cardioprotetor aprovado — atua na rota da ferroptose"],
+        ["Função ventricular", "Ecocardiograma com FEVE e strain global longitudinal antes e durante o tratamento"],
+        ["Biomarcadores", "Troponina e BNP podem subir antes da queda de função — sinal precoce"],
+        ["Dose cumulativa", "O risco cresce com a dose total; toxicidade aguda e tardia têm janelas diferentes"],
+        ["NQO1 na prática", "Candidato a marcador de susceptibilidade: menos enzima, menos defesa"]],
+       M, Inches(1.85), [Inches(3.0), Inches(9.1)], size=14, altura=0.74)
 
 # 6 ----------------------------------------------------------------- NQO1
 s = novo(prs, "NQO1: a enzima que detoxifica quinonas", numero=6, total=TOTAL, notas=(
@@ -381,7 +444,7 @@ tabela(s, ["Script", "O que faz", "Saída principal"],
         ["04_rede_PPI", "Rede de interações no STRING", "rede_ppi_ampk.png"],
         ["05_extras_GSEA_GSVA", "GSEA e GSVA da via AMPK", "GSEA e GSVA (png/csv)"],
         ["06_batch_deconvolution", "SVA e xCell", "SVA_comparacao.csv, xCell_teste.csv"]],
-       M, Inches(1.8), [Inches(2.6), Inches(5.9), Inches(3.9)], size=13, altura=0.52)
+       M, Inches(1.8), [Inches(2.6), Inches(5.9), Inches(3.9)], size=14, altura=0.52)
 txt(s, "Tudo reprodutível: Rscript executar_tutoriais.R",
     M, Inches(6.0), Inches(11.5), Inches(0.4), size=14, bold=True, color=TEAL)
 
@@ -397,6 +460,20 @@ bullets(s, [
     "Controle de falsos positivos por Benjamini-Hochberg (padj).",
     "Corte de significância: padj < 0,05; efeito relevante: |log2FC| >= 0,585.",
 ], M, Inches(1.9), Inches(7.2), Inches(4.6), size=18)
+
+# 11b --------------------------------------------------------------- Ritchie
+s = novo(prs, "Por dentro do limma",
+         sub="Ritchie et al., 2015 — Fig. 2",
+         notas=("Fluxo do limma: matriz de expressao, modelo linear, moderacao empirica da "
+                "variancia e tabela de resultados. E o mesmo caminho que o script 02_volcano.R "
+                "executa."))
+figura(s, "artigos/Ritchie_2015_Fig2_limma_workflow.png", M, Inches(1.5),
+       Inches(6.9), Inches(4.6), "Ritchie et al., 2015, Nucleic Acids Research")
+bullets(s, [
+    "lmFit ajusta um modelo linear por gene.",
+    "eBayes modera a variância entre genes.",
+    "topTable monta a tabela com log2FC, p e padj.",
+], M + Inches(7.2), Inches(1.9), Inches(4.8), Inches(2.6), size=15)
 
 # 12 ---------------------------------------------------------------- seção 3
 capa_num(prs, "03", "Resultados: exploração", "As amostras se organizam por grupo antes de qualquer teste?")
@@ -435,6 +512,32 @@ tabela(s, ["Métrica", "Valor"],
 txt(s, "A DCM é um estado transcriptômico muito alterado: o tamanho de efeito importa.",
     M, Inches(5.9), Inches(11.5), Inches(0.4), size=14, italic=True, color=GRAY)
 
+# 15b --------------------------------------------------------------- ler volcano
+s = novo(prs, "Como ler um volcano plot", notas=(
+    "Eixo x: log2FC, tamanho do efeito. Eixo y: -log10(padj), forca da evidencia. "
+    "Cada ponto e um gene. Os cantos superiores sao os mais interessantes. "
+    "NQO1 cai no canto inferior esquerdo, com evidencia muito alta."))
+tabela(s, ["Elemento", "O que indica"],
+       [["Eixo x (log2FC)", "Tamanho do efeito: quanto o gene muda; negativo = menor na DCM"],
+        ["Eixo y (-log10 padj)", "Força da evidência estatística; mais alto = mais significativo"],
+        ["Cada ponto", "Um gene testado (18.526 no total)"],
+        ["Cantos superiores", "Genes que mudam muito e com evidência forte: os candidatos"],
+        ["NQO1", "Canto inferior esquerdo: muito reduzido e com padj muito baixo"]],
+       M, Inches(1.85), [Inches(3.4), Inches(8.5)], size=15, altura=0.68)
+
+# 15c --------------------------------------------------------------- volcano
+s = novo(prs, "Volcano: o NQO1 entre os mais robustos",
+         sub="limma DCM vs CTRL, ajustado por sexo e idade",
+         notas=("Figura gerada pelo script 02_volcano.R. O NQO1 aparece destacado no canto "
+                "inferior esquerdo: log2FC -1,66 e padj 6,5e-13."))
+figura(s, "volcano_plot.png", M, Inches(1.45), Inches(9.0), Inches(5.2),
+       "Volcano do limma (DCM vs CTRL) · NQO1 destacado")
+bullets(s, [
+    "NQO1: log2FC -1,66 e padj 6,5e-13.",
+    "Fica na zona de maior evidência do lado negativo.",
+    "8.000 genes com padj < 0,05: a DCM muda muito.",
+], M + Inches(9.2), Inches(1.9), Inches(3.1), Inches(2.6), size=14)
+
 # 16 ---------------------------------------------------------------- NQO1 resultado
 s = novo(prs, "NQO1 está downregulado na DCM", numero=16, total=TOTAL,
          notas=("Resultado central do estudo. log2FC -1,66 corresponde a cerca de um terço da "
@@ -451,6 +554,19 @@ bullets(s, [
     "Um coração já doente fica mais vulnerável ao dano da doxorrubicina.",
     "Isso conecta o achado transcriptômico à hipótese clínica de susceptibilidade.",
 ], M, Inches(3.95), Inches(11.6), Inches(2.0), size=18)
+
+# 16b --------------------------------------------------------------- heatmap
+s = novo(prs, "Top DEGs: o padrão por amostra", notas=(
+    "Heatmap dos principais genes diferencialmente expressos. Amostras nas colunas, genes "
+    "nas linhas. Ajuda a ver se o padrao e consistente entre amostras e nao um efeito de "
+    "uma ou duas amostras extremas."))
+figura(s, "ampk/heatmap_top_DEGs.png", M, Inches(1.5), Inches(8.0), Inches(5.2),
+       "Heatmap dos principais DEGs (DCM vs CTRL)")
+bullets(s, [
+    "Linhas = genes; colunas = amostras.",
+    "Cor = expressão relativa (z-score).",
+    "O padrão deve ser consistente entre amostras.",
+], M + Inches(8.3), Inches(1.95), Inches(4.0), Inches(2.6), size=15)
 
 # 17 ---------------------------------------------------------------- seção 4
 capa_num(prs, "04", "Do gene ao sistema", "Gene sets, via AMPK e rede de interações proteicas")
@@ -487,8 +603,67 @@ tabela(s, ["Gene", "Grau", "log2FC"],
 txt(s, "Grau = número de conexões na rede. AKT1 e MTOR concentram a sinalização.",
     M + Inches(6.2), Inches(2.1), Inches(5.8), Inches(1.2), size=16, color=GRAY)
 
+# 20b --------------------------------------------------------------- seção farmaco
+capa_num(prs, "05", "Farmacogenômica",
+         "Quais fármacos modulam o NQO1? (CMAP, LINCS L1000 e CREEDS)")
+
+# 20c --------------------------------------------------------------- dox in vitro
+s = novo(prs, "A própria doxorrubicina derruba o NQO1",
+         sub="Evidência in vitro em bases de farmacogenômica",
+         notas=("Achado importante: nas assinaturas de expressao de linhagens celulares, a "
+                "doxorrubicina reduz o NQO1 (FC medio negativo, q muito baixo, 15 testes em "
+                "duas bases). Isso conversa com o achado in vivo do GSE116250."))
+tabela(s, ["Métrica", "Valor"],
+       [["Fármaco", dox_invitro["Drug_Name"]],
+        ["FC médio do NQO1", br(dox_invitro["mean_fc"])],
+        ["q-valor mínimo", f"{float(dox_invitro['min_q_value']):.1e}"],
+        ["Direção", "downregula o NQO1"],
+        ["Bases consultadas", dox_invitro["sources"]],
+        ["Testes reunidos", dox_invitro["n_tests"]]],
+       M, Inches(1.85), [Inches(3.4), Inches(5.6)], size=15, altura=0.6)
+txt(s, "A DOX reduz o NQO1 nas duas frentes: in vivo (GSE116250) e in vitro.",
+    M + Inches(9.3), Inches(2.1), Inches(3.1), Inches(1.6), size=15, bold=True, color=TEAL)
+
+# 20d --------------------------------------------------------------- ranking
+s = novo(prs, "Fármacos que modulam o NQO1", notas=(
+    "Ranking por evidencia estatistica. Farmacos que sobem o NQO1 sao candidatos a "
+    "induzir a defesa antioxidante; os que descem ajudam a explicar o dano."))
+linhas = []
+for r in farmacos[:6]:
+    seta = "sobe" if "Upregula" in r["direction"] else "desce"
+    linhas.append([r["Drug_Name"], br(r["mean_fc"]), f"{float(r['min_q_value']):.1e}", seta])
+tabela(s, ["Fármaco", "FC médio", "q mínimo", "NQO1"],
+       linhas, M, Inches(1.85), [Inches(4.4), Inches(2.4), Inches(2.6), Inches(2.0)],
+       size=15, altura=0.55)
+txt(s, "Fontes: CMAP, LINCS L1000 e CREEDS. Tabela completa em output/tables/nqo1/.",
+    M, Inches(5.5), Inches(11.5), Inches(0.4), size=12, italic=True, color=GRAY)
+
+# 20e --------------------------------------------------------------- lollipop
+s = novo(prs, "Compostos que modulam o NQO1", notas=(
+    "Grafico de lollipop com os compostos mais associados ao NQO1 no PubChem. "
+    "Serve como ponto de partida para busca de farmacos indutores."))
+figura(s, "pubchem/lollipop_com_counts.png", M, Inches(1.5), Inches(7.6), Inches(5.2),
+       "Compostos associados ao NQO1 (PubChem)")
+bullets(s, [
+    "Compostos com mais associações descritas.",
+    "Candidatos a indutores da defesa antioxidante.",
+    "Hipótese a testar: induzir NQO1 antes da DOX.",
+], M + Inches(7.9), Inches(1.95), Inches(4.4), Inches(2.6), size=15)
+
+# 20f --------------------------------------------------------------- dose-resposta
+s = novo(prs, "Relação dose-resposta", notas=(
+    "Curvas de dose-resposta dos farmacos que alteram o NQO1. Mostra que o efeito "
+    "depende da concentracao — nem sempre mais e melhor."))
+figura(s, "nqo1_drug_regulation/curva_dose_resposta_farmacos_nqo1.png", M, Inches(1.5),
+       Inches(7.4), Inches(5.2), "Curvas de dose-resposta dos fármacos que alteram o NQO1")
+bullets(s, [
+    "O efeito depende da concentração.",
+    "Nem sempre mais dose significa mais efeito.",
+    "A janela terapêutica importa.",
+], M + Inches(7.7), Inches(1.95), Inches(4.6), Inches(2.4), size=15)
+
 # 21 ---------------------------------------------------------------- seção 5
-capa_num(prs, "05", "Vias e robustez", "GSEA, GSVA, fatores latentes e composição celular")
+capa_num(prs, "06", "Vias e robustez", "GSEA, GSVA, fatores latentes e composição celular")
 
 # 22 ---------------------------------------------------------------- GSEA
 s = novo(prs, "GSEA: a via AMPK não enriquece", numero=22, total=TOTAL,
@@ -609,6 +784,19 @@ txt(s, "Rscript executar_tutoriais.R", M, Inches(4.6), Inches(11.5), Inches(0.5)
     size=20, bold=True, color=TEAL)
 txt(s, "Os números desta apresentação vêm das tabelas em output/tables.",
     M, Inches(5.2), Inches(11.5), Inches(0.4), size=13, italic=True, color=GRAY)
+
+# 30b --------------------------------------------------------------- discussão
+s = novo(prs, "Perguntas para discussão", notas=(
+    "Dar 5 minutos em duplas e depois abrir para a turma. Sao perguntas que ligam o "
+    "resultado a pratica e a limitacao do estudo."))
+bullets(s, [
+    "Se o NQO1 cai na DCM, por que a cardiotoxicidade da DOX varia tanto entre pacientes?",
+    "Induzir o NQO1 antes do tratamento seria cardioproteção — quais seriam os riscos?",
+    "O dexrazoxano age na ferroptose. Isso ajuda a explicar por que ele protege o coração?",
+    "Que evidência faltaria para propor o NQO1 como biomarcador na prática clínica?",
+], M, Inches(1.9), Inches(11.8), Inches(3.6), size=19, space=14)
+txt(s, "5 minutos em duplas e depois discussão aberta.", M, Inches(5.9), Inches(11.5),
+    Inches(0.4), size=13, italic=True, color=GRAY)
 
 # 31 ---------------------------------------------------------------- referências
 s = novo(prs, "Referências", numero=31, total=TOTAL,
