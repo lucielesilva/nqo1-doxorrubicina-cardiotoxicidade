@@ -13,6 +13,8 @@ O que este script faz
 4) Cruza os parceiros do STRING com as vias KEGG/Reactome.
 5) Anota os nós com o log2FoldChange (DCM vs CTRL) do resultado do limma.
 6) Gera figuras (rede, barras, heatmap, mapas de via) e tabelas CSV.
+   A interpretação dos resultados está integrada ao RELATORIO_CIENTIFICO.md
+   (seção 4).
 
 Saídas principais
 -----------------
@@ -998,86 +1000,15 @@ def figura_reactome_diagrama(reactome: pd.DataFrame) -> None:
 # ---------------------------------------------------------------------------
 # 8) RELATÓRIO EM MARKDOWN
 # ---------------------------------------------------------------------------
-def _md_tabela(df: pd.DataFrame, colunas: list[str], renomear: dict[str, str] | None = None) -> str:
-    d = df[colunas].copy()
-    if renomear:
-        d = d.rename(columns=renomear)
-    for c in d.columns:
-        if d[c].dtype == object:
-            d[c] = d[c].fillna("").astype(str)
-    return d.to_markdown(index=False)
-
-
-def escrever_relatorio(
+def salvar_metricas(
     nodes: pd.DataFrame,
     kegg: pd.DataFrame,
     reactome: pd.DataFrame,
-    hierarquia: pd.DataFrame,
-    arestas: pd.DataFrame,
     g: nx.Graph,
 ) -> None:
-    log("Escrevendo relatório Markdown...")
+    """Salva a tabela-resumo da análise de rede e vias."""
+    log("Salvando métricas do resumo...")
     nqo = nodes[nodes["is_nqo1"]].iloc[0]
-    top = nodes[nodes["gene"] != GENE].nlargest(15, "degree")
-
-    top_fmt = top.copy()
-    top_fmt["direct_score_nqo1"] = top_fmt["direct_score_nqo1"].map(
-        lambda x: "—" if pd.isna(x) else f"{x:.3f}"
-    )
-    top_fmt["log2FoldChange"] = top_fmt["log2FoldChange"].map(
-        lambda x: "—" if pd.isna(x) else f"{x:+.2f}"
-    )
-    top_fmt["padj"] = top_fmt["padj"].map(
-        lambda x: "—" if pd.isna(x) else f"{x:.2e}"
-    )
-    top_md = _md_tabela(
-        top_fmt,
-        ["gene", "degree", "direct_score_nqo1", "log2FoldChange", "padj", "n_kegg", "n_reactome"],
-        {
-            "gene": "Gene",
-            "degree": "Grau",
-            "direct_score_nqo1": "Score NQO1",
-            "log2FoldChange": "log2FC",
-            "padj": "padj",
-            "n_kegg": "Vias KEGG*",
-            "n_reactome": "Vias Reactome*",
-        },
-    )
-
-    kegg_md = _md_tabela(
-        kegg,
-        ["pathway_id", "pathway_name", "class", "n_genes_pathway", "n_string_partners", "string_partners"],
-        {
-            "pathway_id": "ID",
-            "pathway_name": "Via KEGG",
-            "class": "Classe",
-            "n_genes_pathway": "Genes na via",
-            "n_string_partners": "Parceiros STRING",
-            "string_partners": "Parceiros",
-        },
-    )
-    react_md = _md_tabela(
-        reactome,
-        ["pathway_id", "pathway_name", "top_level", "n_participants", "n_string_partners", "string_partners"],
-        {
-            "pathway_id": "ID",
-            "pathway_name": "Via Reactome",
-            "top_level": "Top-level",
-            "n_participants": "Genes/participantes",
-            "n_string_partners": "Parceiros STRING",
-            "string_partners": "Parceiros",
-        },
-    )
-
-    hier_md = _md_tabela(
-        hierarquia[hierarquia["direto"] == False],
-        ["pathway_id", "evento", "top_level"],
-        {
-            "pathway_id": "Via NQO1",
-            "evento": "Evento ancestral",
-            "top_level": "Top-level",
-        },
-    )
 
     metricas = pd.DataFrame(
         [
@@ -1097,175 +1028,8 @@ def escrever_relatorio(
         columns=["Métrica", "Valor"],
     )
     metricas.to_csv(TAB / "nqo1_resumo_metricas.csv", index=False)
-    metricas_md = metricas.to_markdown(index=False)
-
-    texto = f"""# NQO1 — rede PPI no STRING e vias no KEGG e Reactome
-
-**Gene alvo:** NQO1 (UniProt {UNIPROT}) · **Espécie:** *Homo sapiens* (9606)  
-**Dataset de expressão:** GSE116250 (DCM vs CTRL, limma)  
-**Data da análise:** {pd.Timestamp.today().strftime('%d/%m/%Y')}
-
----
-
-## 1. Resumo
-
-| Banco | O que foi consultado | Resultado principal |
-|---|---|---|
-| **STRING** | Rede de vizinhança direta de NQO1, score ≥ {STRING_SCORE} | **{g.number_of_nodes()} nós** e **{g.number_of_edges()} arestas**; NQO1 tem **{g.degree(GENE)} parceiros diretos** |
-| **KEGG** | Vias que contêm NQO1 e genes dessas vias | **{len(kegg)} vias**; NQO1 aparece em vias de metabolismo e de doenças humanas |
-| **Reactome** | Vias de baixo nível que contêm NQO1 e hierarquia | **{len(reactome)} vias**; a principal é a via **NFE2L2/KEAP1** |
-
-> **NQO1 no dataset:** log2FC = **{nqo['log2FoldChange']:.2f}** (padj = **{nqo['padj']:.2e}**), ou seja, **{nqo['direction']}regulado** na cardiomiopatia dilatada (DCM) em relação ao controle.
-
-![Rede PPI centrada em NQO1](output/figures/nqo1_rede_ppi_string.png)
-
-**Como ler a rede:** cada bolinha é uma proteína; o centro é o NQO1. O anel externo mostra os {g.degree(GENE)} parceiros diretos. O tamanho do nó representa o grau (nº de conexões na rede); a cor representa o log2FC na DCM (azul = down, vermelho = up; cinza = gene não medido no dataset). As linhas escuras ligam NQO1 aos parceiros; as linhas claras mostram interações entre os próprios parceiros.
-
----
-
-## 2. Métodos (resumo)
-
-1. **STRING** — API `network` (`species=9606`, `required_score={STRING_SCORE}`, `limit={STRING_LIMIT}`). O score combinado varia de 0 a 1; ≥ 0,700 é considerado alta confiança. A rede inclui NQO1, seus parceiros diretos e as interações entre esses parceiros.
-2. **KEGG** — API REST (`/link/pathway/hsa:1728`, `/link/hsa/{{pathway}}`, `/get/{{pathway}}`). Foram obtidas as vias que contêm NQO1, seus nomes, classes e genes.
-3. **Reactome** — Content Service (`/search/query`, `/data/pathways/low/entity/...`, `/data/event/.../ancestors`, `/data/participants/...`). Foram obtidas as vias de baixo nível, a hierarquia até o top-level e os participantes.
-4. **Expressão** — resultado do `limma` do projeto (`resultado_limma_DCM_vs_CTRL.rds`), usado apenas para colorir os nós.
-5. **Cruzamento** — cada parceiro do STRING foi comparado com os genes/participantes das vias KEGG e Reactome que contêm NQO1.
-
-> **Importante:** KEGG e Reactome **não são bases de PPI**. A rede de interações proteína-proteína vem do STRING; KEGG/Reactome entram como anotação de vias e contexto funcional.
-
----
-
-## 3. Resultados
-
-### 3.1 Rede PPI do STRING
-
-A rede tem **{g.number_of_nodes()} proteínas** e **{g.number_of_edges()} interações** de alta confiança. O NQO1 é o nó central, com **{g.degree(GENE)} parceiros diretos**. Os nós mais conectados (hubs) são **{', '.join(top.head(5)['gene'].tolist())}**.
-
-**Tabela 1 — 15 parceiros com maior grau na rede** (o NQO1 não entra nesta lista; ele é o centro).
-
-{top_md}
-
-\\* Número de vias **de NQO1** (KEGG ou Reactome) em que o parceiro também aparece; não é o total de vias do gene.
-
-**Arquivos completos:**
-- `output/tables/nqo1_string_ppi_arestas.csv` — todas as arestas, com score e canais de evidência do STRING (pode ser importado no Cytoscape como edge list).
-- `output/tables/nqo1_string_ppi_nos.csv` — todos os nós, com grau, centralidades, log2FC e vias compartilhadas.
-
-#### Módulos que aparecem na rede
-
-- **Módulo NRF2/KEAP1:** NFE2L2, KEAP1, GCLC, GCLM, HMOX1, GSR, TXNRD1, SRXN1, TXN. É o eixo clássico de resposta antioxidante e detoxificação.
-- **Família GPX:** GPX2, GPX3, GPX5, GPX6, GPX7 e GPX8 formam um grupo muito conectado, ligado ao metabolismo de peróxidos.
-- **Eixo TP53/STUB1/PARK7:** TP53, TP73, STUB1 e PARK7 aparecem como conexões de estresse celular e controle de qualidade proteica.
-- **Metabolismo de quinonas/vitamina K:** GGCX, VKORC1, VKORC1L1, CRYZ e NDUFS7.
-
-### 3.2 KEGG
-
-O NQO1 está anotado em **{len(kegg)} vias KEGG**:
-
-![Vias KEGG que contêm NQO1](output/figures/nqo1_kegg_pathways.png)
-
-**Tabela 2 — Vias KEGG que contêm NQO1.**
-
-{kegg_md}
-
-**Como ler:** a barra mostra quantos parceiros diretos de NQO1 no STRING também estão naquela via. O número entre parênteses é o total de genes da via no KEGG.
-
-**Destaque:** `hsa05208` (*Chemical carcinogenesis — reactive oxygen species*) é particularmente relevante para o projeto, pois conecta NQO1 ao estresse oxidativo e à sinalização NRF2/KEAP1. O mapa dessa via, com o NQO1 destacado em vermelho, está em:
-
-<img src="output/figures/nqo1_kegg_diagram_hsa05208.png" width="720" alt="Mapa KEGG hsa05208 com NQO1 destacado">
-
-*No mapa, os retângulos vermelhos marcam as ocorrências de NQO1.*
-
-### 3.3 Reactome
-
-O NQO1 está anotado em **{len(reactome)} vias de baixo nível** no Reactome:
-
-![Vias Reactome que contêm NQO1](output/figures/nqo1_reactome_pathways.png)
-
-**Tabela 3 — Vias Reactome de baixo nível que contêm NQO1.**
-
-{react_md}
-
-**Hierarquia até o top-level** (eventos ancestrais, sem repetir a própria via):
-
-{hier_md}
-
-**Destaque:** a via **R-HSA-9818027** (*NFE2L2 regulating anti-oxidant/detoxification enzymes*) é a que mais converge com a rede PPI: **{int(reactome.loc[reactome['pathway_id']=='R-HSA-9818027','n_string_partners'].iloc[0])} parceiros** do STRING também participam dela. Ela sobe na hierarquia até **Cellular responses to stimuli**, passando por *KEAP1-NFE2L2 pathway* e *Cellular response to chemical stress*.
-
-<img src="output/figures/nqo1_reactome_diagram_nfe2l2.png" width="720" alt="Diagrama Reactome da via NFE2L2">
-
-*Diagrama da via R-HSA-9818027 no Reactome.*
-
-### 3.4 Integração: parceiros que compartilham vias com NQO1
-
-![Heatmap de vias compartilhadas](output/figures/nqo1_heatmap_vias_parceiros.png)
-
-O heatmap mostra, para cada parceiro de NQO1, em quais vias KEGG (bloco à esquerda) e Reactome (bloco à direita) ele também aparece. As linhas mais “cheias” são os parceiros que mais convergem funcionalmente com NQO1. O NQO1 aparece em todas as colunas por definição (é o gene consultado).
-
-**Tabela 4 — Parceiros com maior número de vias compartilhadas.**
-
-{_md_tabela(nodes[nodes['gene'] != GENE].nlargest(15, 'n_pathways_total'), ['gene', 'degree', 'n_kegg', 'n_reactome', 'n_pathways_total', 'kegg_pathway_ids', 'reactome_pathway_ids'], {'gene': 'Gene', 'degree': 'Grau', 'n_kegg': 'KEGG', 'n_reactome': 'Reactome', 'n_pathways_total': 'Total', 'kegg_pathway_ids': 'IDs KEGG', 'reactome_pathway_ids': 'IDs Reactome'})}
-
----
-
-## 4. Métricas do resumo
-
-{metricas_md}
-
----
-
-## 5. Limitações
-
-- O STRING integra **evidências heterogêneas** (texto, experimentos, bancos de dados, coexpressão, vizinhança genômica, fusão gênica). Uma aresta não significa necessariamente contato físico direto.
-- O score ≥ {STRING_SCORE} reduz falsos positivos, mas ainda pode incluir associações funcionais indiretas.
-- O KEGG e o Reactome têm cobertura e granularidade diferentes; a ausência de uma via em um banco não significa ausência biológica.
-- A rede é **centrada em NQO1** (primeira vizinhança). Ela não é a rede completa do interactoma humano.
-- O log2FC vem do dataset GSE116250 e depende do modelo estatístico do projeto (DCM vs CTRL, ajustado por sexo/idade). Genes não medidos aparecem em cinza.
-- O símbolo **SOD2-2** foi mantido como retornado pelo STRING; no cruzamento com KEGG, foi tratado como alias de **SOD2**.
-- KEGG e Reactome são bases de **vias**, não de PPI. A rede PPI é do STRING.
-
----
-
-## 6. Reprodutibilidade
-
-```bash
-python tutoriais/07_PPI_NQO1_string_kegg_reactome.py
-```
-
-Para forçar a atualização dos dados baixados:
-
-```bash
-NQO1_REFRESH=1 python tutoriais/07_PPI_NQO1_string_kegg_reactome.py
-```
-
-Os dados brutos ficam em `output/temp/nqo1_ppi_multidb/`. As figuras e tabelas são gravadas em `output/figures/` e `output/tables/`.
-
----
-
-## 7. Arquivos gerados
-
-### Figuras
-- `output/figures/nqo1_rede_ppi_string.png`
-- `output/figures/nqo1_kegg_pathways.png`
-- `output/figures/nqo1_reactome_pathways.png`
-- `output/figures/nqo1_heatmap_vias_parceiros.png`
-- `output/figures/nqo1_kegg_diagram_hsa05208.png`
-- `output/figures/nqo1_reactome_diagram_nfe2l2.png`
-
-### Tabelas
-- `output/tables/nqo1_string_ppi_arestas.csv`
-- `output/tables/nqo1_string_ppi_nos.csv`
-- `output/tables/nqo1_kegg_pathways.csv`
-- `output/tables/nqo1_reactome_pathways.csv`
-- `output/tables/nqo1_reactome_hierarquia.csv`
-- `output/tables/nqo1_resumo_metricas.csv`
-
----
-
-*Relatório gerado automaticamente pelo script `tutoriais/07_PPI_NQO1_string_kegg_reactome.py`.*
-"""
-    (ROOT / "RELATORIO_NQO1_PPI_STRING_KEGG_REACTOME.md").write_text(texto, encoding="utf-8")
-    log("Relatório salvo em RELATORIO_NQO1_PPI_STRING_KEGG_REACTOME.md.")
+    log("Métricas salvas em output/tables/nqo1_resumo_metricas.csv.")
+    log("A interpretação está integrada em RELATORIO_CIENTIFICO.md, seção 4.")
 
 
 # ---------------------------------------------------------------------------
@@ -1304,8 +1068,8 @@ def main() -> None:
     figura_kegg_diagrama()
     figura_reactome_diagrama(reactome)
 
-    # Relatório.
-    escrever_relatorio(nodes, kegg, reactome, hierarquia, arestas, g)
+    # Métricas.
+    salvar_metricas(nodes, kegg, reactome, g)
 
     log("Concluído.")
     log(f"Rede: {g.number_of_nodes()} nós, {g.number_of_edges()} arestas, "

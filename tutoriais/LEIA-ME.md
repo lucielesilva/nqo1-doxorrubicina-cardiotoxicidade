@@ -59,9 +59,9 @@ tópicos, tabelas, figuras, notas e numeração).
 | `07_PPI_NQO1_string_kegg_reactome.py` | **Extra em Python:** rede PPI centrada em NQO1 no STRING + vias KEGG/Reactome, com figuras e tabelas. | 02 (para colorir com log2FC) |
 | `executar_tutoriais.R` (na raiz) | Runner que executa tudo na ordem correta. | — |
 
-O `07` é um extra opcional em Python (não entra no runner R). Ele gera o
-relatório `RELATORIO_NQO1_PPI_STRING_KEGG_REACTOME.md` e as saídas
-`output/figures/nqo1_*` e `output/tables/nqo1_*`.
+O `07` é um extra opcional em Python (não entra no runner R). Ele gera as
+saídas `output/figures/nqo1_*` e `output/tables/nqo1_*`. A interpretação
+desses resultados está integrada na seção 4 do `RELATORIO_CIENTIFICO.md`.
 
 O `03_gene_sets.R` vem antes da rede e do GSEA de propósito: primeiro fica claro
 *quais* genes entraram na análise, depois se interpretam vias e interações.
