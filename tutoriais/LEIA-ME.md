@@ -56,7 +56,12 @@ tópicos, tabelas, figuras, notas e numeração).
 | `04_rede_PPI.R` | Rede de interações da via AMPK no STRING. | 02 |
 | `05_extras_GSEA_GSVA.R` | GSEA e GSVA da via AMPK. | 02 |
 | `06_batch_deconvolution.R` | Correção de batch com SVA e deconvolução celular com xCell. | 02 |
+| `07_PPI_NQO1_string_kegg_reactome.py` | **Extra em Python:** rede PPI centrada em NQO1 no STRING + vias KEGG/Reactome, com figuras e tabelas. | 02 (para colorir com log2FC) |
 | `executar_tutoriais.R` (na raiz) | Runner que executa tudo na ordem correta. | — |
+
+O `07` é um extra opcional em Python (não entra no runner R). Ele gera o
+relatório `RELATORIO_NQO1_PPI_STRING_KEGG_REACTOME.md` e as saídas
+`output/figures/nqo1_*` e `output/tables/nqo1_*`.
 
 O `03_gene_sets.R` vem antes da rede e do GSEA de propósito: primeiro fica claro
 *quais* genes entraram na análise, depois se interpretam vias e interações.
@@ -156,7 +161,8 @@ espessura da aresta proporcional à confiança e rótulos com `ggrepel` apenas n
 
 ### `05_extras_GSEA_GSVA.R`
 - `output/figures/GSEA_AMPK_enrichment_plot.png`
-- `output/figures/GSVA_AMPK_boxplot.png`
+- `output/figures/GSVA_AMPK_violino.png`
+- `output/figures/ampk/GSVA_AMPK_violino.png`
 - `output/tables/gsea_via_ampk.csv`
 - `output/tables/gsea_via_ampk_leading_edge.csv`
 - `output/tables/gsva_via_ampk.csv`
@@ -165,7 +171,7 @@ espessura da aresta proporcional à confiança e rótulos com `ggrepel` apenas n
 
 O script está dividido em etapas explícitas: montar o ranking, rodar o GSEA,
 organizar a tabela, desenhar o gráfico; depois preparar a matriz, rodar a GSVA,
-resumir por grupo, testar com Wilcoxon e desenhar o boxplot.
+resumir por grupo, testar com Wilcoxon e desenhar o violino com caixa interna.
 
 ### `06_batch_deconvolution.R`
 - `output/tables/SVA_comparacao.csv`
@@ -175,7 +181,7 @@ resumir por grupo, testar com Wilcoxon e desenhar o boxplot.
 - `output/tables/xCell_scores.csv`
 - `output/tables/xCell_teste.csv`
 - `output/figures/xCell_heatmap.png`
-- `output/figures/xCell_boxplots.png`
+- `output/figures/xCell_violinos.png`
 
 ## Dependências
 

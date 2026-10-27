@@ -1,0 +1,6 @@
+conjunto,n
+Dataset após filtro de expressão,18526
+Via AMPK (KEGG hsa04152),122
+Interseção (dataset ∩ via AMPK),106
+Somente no dataset,18420
+Somente na via AMPK,16

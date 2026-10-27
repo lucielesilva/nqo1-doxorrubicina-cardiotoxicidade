@@ -248,31 +248,34 @@ pheatmap(
   width = 9.5, height = 6.5
 )
 
-# Boxplots dos tipos selecionados, com ICM como contexto
+# Violinos dos tipos selecionados, com ICM como contexto
 long <- as.data.frame(t(mat)) |>
   tibble::rownames_to_column("sample") |>
   pivot_longer(-sample, names_to = "cell_type", values_to = "score") |>
   left_join(pheno, by = "sample")
 
-p_box <- ggplot(long, aes(group, score, fill = group)) +
-  geom_boxplot(width = 0.6, alpha = 0.75, outlier.shape = NA) +
-  geom_jitter(width = 0.12, size = 0.8, alpha = 0.55, color = "grey25") +
+p_violino <- ggplot(long, aes(group, score, fill = group)) +
+  geom_violin(width = 0.85, alpha = 0.35, color = NA, trim = FALSE) +
+  geom_boxplot(width = 0.14, fill = "white", alpha = 0.9,
+               outlier.shape = NA, linewidth = 0.4) +
+  geom_jitter(width = 0.09, size = 0.7, alpha = 0.55, color = "grey20") +
   facet_wrap(~ cell_type, scales = "free_y", ncol = 3) +
   scale_fill_manual(values = c(CTRL = "#1B9E77",
                                DCM  = "#D95F02",
                                ICM  = "#7570B3")) +
   labs(
-    title = "xCell: escores por grupo",
-    subtitle = "ICM mostrada como contexto; testes estatísticos comparam DCM vs CTRL.",
+    title = "xCell: distribuição dos escores por grupo",
+    subtitle = paste0("Violino = distribuição dos escores; caixa interna = mediana e quartis. ",
+                      "ICM mostrada como contexto; os testes comparam DCM vs CTRL."),
     x = NULL, y = "Escore xCell (enriquecimento relativo)",
     fill = "Grupo"
   ) +
   theme_minimal(base_size = 11) +
   theme(legend.position = "bottom",
         strip.text = element_text(face = "bold"),
-        plot.subtitle = element_text(hjust = 0))
+        plot.subtitle = element_text(hjust = 0, size = 9))
 
-save_plot(p_box, "xCell_boxplots.png", 10, 7)
+save_plot(p_violino, "xCell_violinos.png", 10, 7)
 
 message("SVA: output/tables/SVA_comparacao.csv e SVA_logFC_antes_depois.png")
 message("xCell: output/tables/xCell_teste.csv e xCell_heatmap.png")

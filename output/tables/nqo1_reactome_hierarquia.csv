@@ -1,0 +1,15 @@
+pathway_id,pathway_name,ordem,evento,direto,top_level,url
+R-HSA-350562,Regulation of ornithine decarboxylase (ODC),0,Regulation of ornithine decarboxylase (ODC),True,Metabolism,https://reactome.org/content/detail/R-HSA-350562
+R-HSA-350562,Regulation of ornithine decarboxylase (ODC),1,Metabolism of polyamines,False,Metabolism,https://reactome.org/content/detail/R-HSA-350562
+R-HSA-350562,Regulation of ornithine decarboxylase (ODC),2,Metabolism of amino acids and derivatives,False,Metabolism,https://reactome.org/content/detail/R-HSA-350562
+R-HSA-350562,Regulation of ornithine decarboxylase (ODC),3,Metabolism,False,Metabolism,https://reactome.org/content/detail/R-HSA-350562
+R-HSA-9943962,"CHD6, CHD7, CHD8, CHD9 subfamily",0,"CHD6, CHD7, CHD8, CHD9 subfamily",True,Chromatin organization,https://reactome.org/content/detail/R-HSA-9943962
+R-HSA-9943962,"CHD6, CHD7, CHD8, CHD9 subfamily",1,CHD chromatin remodelers,False,Chromatin organization,https://reactome.org/content/detail/R-HSA-9943962
+R-HSA-9943962,"CHD6, CHD7, CHD8, CHD9 subfamily",2,ATP-dependent chromatin remodelers,False,Chromatin organization,https://reactome.org/content/detail/R-HSA-9943962
+R-HSA-9943962,"CHD6, CHD7, CHD8, CHD9 subfamily",3,Chromatin organization,False,Chromatin organization,https://reactome.org/content/detail/R-HSA-9943962
+R-HSA-9818027,NFE2L2 regulating anti-oxidant/detoxification enzymes,0,NFE2L2 regulating anti-oxidant/detoxification enzymes,True,Cellular responses to stimuli,https://reactome.org/content/detail/R-HSA-9818027
+R-HSA-9818027,NFE2L2 regulating anti-oxidant/detoxification enzymes,1,Nuclear events mediated by NFE2L2,False,Cellular responses to stimuli,https://reactome.org/content/detail/R-HSA-9818027
+R-HSA-9818027,NFE2L2 regulating anti-oxidant/detoxification enzymes,2,KEAP1-NFE2L2 pathway,False,Cellular responses to stimuli,https://reactome.org/content/detail/R-HSA-9818027
+R-HSA-9818027,NFE2L2 regulating anti-oxidant/detoxification enzymes,3,Cellular response to chemical stress,False,Cellular responses to stimuli,https://reactome.org/content/detail/R-HSA-9818027
+R-HSA-9818027,NFE2L2 regulating anti-oxidant/detoxification enzymes,4,Cellular responses to stress,False,Cellular responses to stimuli,https://reactome.org/content/detail/R-HSA-9818027
+R-HSA-9818027,NFE2L2 regulating anti-oxidant/detoxification enzymes,5,Cellular responses to stimuli,False,Cellular responses to stimuli,https://reactome.org/content/detail/R-HSA-9818027

@@ -298,13 +298,17 @@ write_csv(tabela_teste_gsva,
 # ------------------------------------------------------------------------------
 # COMO LER?
 #   * Cada ponto é uma amostra.
-#   * A caixa mostra mediana e quartis.
-#   * Se as caixas de CTRL e DCM estão em alturas diferentes, a via tem
+#   * O violino mostra a distribuição completa dos escores.
+#   * A caixa estreita dentro do violino marca mediana e quartis.
+#   * Se os violinos de CTRL e DCM estão em alturas diferentes, a via tem
 #     atividade média diferente entre os grupos.
 #   * O p-valor e o -log10(p) aparecem no subtítulo.
 grafico_gsva <- ggplot(tabela_escores, aes(x = group, y = AMPK_score, fill = group)) +
-  geom_boxplot(width = 0.55, alpha = 0.75, outlier.shape = NA) +
-  geom_jitter(width = 0.12, size = 1.4, alpha = 0.7, color = "grey25") +
+  geom_violin(width = 0.78, alpha = 0.55, color = "grey30", linewidth = 0.45,
+              trim = FALSE) +
+  geom_boxplot(width = 0.12, fill = "white", alpha = 0.9,
+               outlier.shape = NA, linewidth = 0.4) +
+  geom_jitter(width = 0.1, size = 1.4, alpha = 0.7, color = "grey25") +
   scale_fill_manual(values = c(CTRL = "#1B9E77", DCM = "#D95F02")) +
   labs(
     title    = "GSVA da via AMPK (escore por amostra)",
@@ -313,19 +317,26 @@ grafico_gsva <- ggplot(tabela_escores, aes(x = group, y = AMPK_score, fill = gro
     x = NULL,
     y = "Escore GSVA da via AMPK",
     fill = "Grupo",
-    caption = paste0("Cada ponto é uma amostra; a caixa mostra a mediana e os quartis. ",
+    caption = paste0("Cada ponto é uma amostra. O violino mostra a distribuição; ",
+                     "a caixa interna marca a mediana e os quartis. ",
                      "Escore alto = via mais ativa naquela amostra.")
   ) +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom",
         plot.caption = element_text(hjust = 0))
 
-save_plot(grafico_gsva, "GSVA_AMPK_boxplot.png", 7.5, 6)
+save_plot(grafico_gsva, "GSVA_AMPK_violino.png", 7.5, 6)
+
+# O README e a versão organizada do projeto usam a subpasta ampk.
+dir.create(file.path(FIGURES, "ampk"), recursive = TRUE, showWarnings = FALSE)
+file.copy(file.path(FIGURES, "GSVA_AMPK_violino.png"),
+          file.path(FIGURES, "ampk", "GSVA_AMPK_violino.png"),
+          overwrite = TRUE)
 
 # ==============================================================================
 # FIM
 # ==============================================================================
 step("FIM DO SCRIPT 05 — GSEA e GSVA concluídos.")
 message("GSEA: output/figures/GSEA_AMPK_enrichment_plot.png")
-message("GSVA: output/figures/GSVA_AMPK_boxplot.png")
+message("GSVA: output/figures/GSVA_AMPK_violino.png")
 message("Tabelas: output/tables/gsea_via_ampk*.csv e gsva_via_ampk*.csv")

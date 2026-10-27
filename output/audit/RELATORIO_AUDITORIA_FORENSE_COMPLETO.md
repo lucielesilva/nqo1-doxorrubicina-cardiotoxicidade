@@ -78,7 +78,7 @@
 │  ❌ Download dos dados do STRING                                      │
 │  ❌ Geração do DGB_results_NQO1.xlsx                                 │
 │  ❌ Heatmap da via AMPK                                              │
-│  ❌ Boxplot GSVA                                                     │
+│  ❌ Violino GSVA                                                     │
 │  ❌ Volcano plot do DEG                                              │
 │                                                                      │
 │  Todos estes outputs existem nos diretórios mas foram gerados        │
@@ -364,7 +364,7 @@ O paper **não menciona trichostatin A, manumycin-a, parthenolide nem panobinost
 - **OK**
 
 ### 8.5 Figuras AMPK (não geradas pelo script.R)
-- `volcano_plot.png`, `heatmap_AMPK_pathway.png`, `heatmap_top_DEGs.png`, `GSEA_AMPK_enrichment_plot.png`, `GSVA_AMPK_boxplot.png`
+- `volcano_plot.png`, `heatmap_AMPK_pathway.png`, `heatmap_top_DEGs.png`, `GSEA_AMPK_enrichment_plot.png`, `GSVA_AMPK_violino.png`
 - Geradas por script externo. Não auditáveis completamente.
 
 ---

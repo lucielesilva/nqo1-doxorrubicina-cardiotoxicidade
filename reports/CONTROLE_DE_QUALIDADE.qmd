@@ -26,7 +26,7 @@ rpkm <- read.delim(gzfile("data/raw/GSE116250_rpkm.txt.gz"),
 # Matriz numérica: primeira coluna = Gene, segunda = Common_name
 expr <- rpkm[, -(1:2)]
 expr <- as.data.frame(lapply(expr, as.numeric))
-rownames(expr) <- rpkm$Common_name
+rownames(expr) <- make.unique(rpkm$Common_name)
 
 # Metadados
 pheno <- read.csv("output/tables/ampk/metadados_das_amostras.csv", check.names = FALSE)
@@ -35,16 +35,18 @@ pheno <- pheno |>
   dplyr::rename(sample = title, group = `disease:ch1`, sex = `Sex:ch1`, age = `age:ch1`)
 ```
 
-## 2. Boxplot antes da normalização (escala linear RPKM)
+## 2. Violino antes da normalização (escala linear RPKM)
 
-```{r box-before, fig.height=7}
+```{r violin-before, fig.height=7}
 expr_long <- expr |>
   tibble::rownames_to_column("gene") |>
   tidyr::pivot_longer(-gene, names_to = "sample", values_to = "expr") |>
   dplyr::left_join(pheno, by = "sample")
 
 ggplot(expr_long, aes(x = sample, y = expr + 1, fill = group)) +
-  geom_boxplot(outlier.size = 0.3, lwd = 0.2) +
+  geom_violin(scale = "width", trim = TRUE, linewidth = 0.15, alpha = 0.75) +
+  geom_boxplot(width = 0.12, outlier.shape = NA, linewidth = 0.15,
+               fill = "white", alpha = 0.85, color = "grey30") +
   scale_y_log10() +
   labs(title = "Distribuição de expressão por amostra (RPKM, antes da normalização)",
        y = "RPKM + 1 (log10)") +
@@ -53,9 +55,9 @@ ggplot(expr_long, aes(x = sample, y = expr + 1, fill = group)) +
         legend.position = "bottom")
 ```
 
-## 3. Boxplot depois da normalização (log2(CPM/TMM), sugerida)
+## 3. Violino depois da normalização (log2(CPM/TMM), sugerida)
 
-```{r box-after, fig.height=7}
+```{r violin-after, fig.height=7}
 # Transformação reprodutível sugerida (config.yaml: normalization = log2-TMM)
 expr_log <- log2(expr + 1)
 expr_log_long <- expr_log |>
@@ -64,7 +66,9 @@ expr_log_long <- expr_log |>
   dplyr::left_join(pheno, by = "sample")
 
 ggplot(expr_log_long, aes(x = sample, y = expr, fill = group)) +
-  geom_boxplot(outlier.size = 0.3, lwd = 0.2) +
+  geom_violin(scale = "width", trim = TRUE, linewidth = 0.15, alpha = 0.75) +
+  geom_boxplot(width = 0.12, outlier.shape = NA, linewidth = 0.15,
+               fill = "white", alpha = 0.85, color = "grey30") +
   labs(title = "Distribuição de expressão por amostra (log2(RPKM + 1))",
        y = "log2(RPKM + 1)") +
   theme_minimal(base_size = 11) +

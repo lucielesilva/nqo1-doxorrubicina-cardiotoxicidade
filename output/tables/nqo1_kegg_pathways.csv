@@ -1,0 +1,8 @@
+pathway_id,pathway_name,class,class_group,n_genes_pathway,url,string_partners,n_string_partners
+hsa01100,Metabolic pathways,Metabolism; Global and overview maps,Metabolism,1583,https://www.kegg.jp/pathway/hsa01100,ADK;CYP1A1;GCLC;GCLM;GGCX;GOT2;GPX2;GPX3;GPX5;GPX6;GPX7;GPX8;GSR;GSTM1;GSTP1;HMOX1;NDUFS7;NME1;ODC1;VKORC1;VKORC1L1,21
+hsa05208,Chemical carcinogenesis - reactive oxygen species,Human Diseases; Cancer: overview,Human Diseases,226,https://www.kegg.jp/pathway/hsa05208,AKT1;CYP1A1;EPHX1;GSTM1;HIF1A;HMOX1;JUN;KEAP1;NDUFS7;NFE2L2;SOD2-2,11
+hsa05418,Fluid shear stress and atherosclerosis,Human Diseases; Cardiovascular disease,Human Diseases,142,https://www.kegg.jp/pathway/hsa05418,AKT1;GSTM1;GSTP1;HMOX1;JUN;KEAP1;NFE2L2;TNF;TP53;TXN,10
+hsa05200,Pathways in cancer,Human Diseases; Cancer: overview,Human Diseases,533,https://www.kegg.jp/pathway/hsa05200,AKT1;GSTM1;GSTP1;HIF1A;HMOX1;JUN;KEAP1;NFE2L2;TP53;TXNRD1,10
+hsa05225,Hepatocellular carcinoma,Human Diseases; Cancer: specific types,Human Diseases,170,https://www.kegg.jp/pathway/hsa05225,AKT1;GSTM1;GSTP1;HMOX1;KEAP1;NFE2L2;TP53;TXNRD1,8
+hsa01240,Biosynthesis of cofactors,Metabolism; Metabolism of cofactors and vitamins,Metabolism,154,https://www.kegg.jp/pathway/hsa01240,GCLC;GCLM;GGCX;NME1;VKORC1;VKORC1L1,6
+hsa00130,Ubiquinone and other terpenoid-quinone biosynthesis,Metabolism; Metabolism of cofactors and vitamins,Metabolism,12,https://www.kegg.jp/pathway/hsa00130,GGCX;VKORC1;VKORC1L1,3

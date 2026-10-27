@@ -1,0 +1,2 @@
+gene,log2FoldChange,AveExpr,pvalue,padj,neg_log10_padj,direction,significant
+NQO1,-1.6642634583789921,4.230502000982954,1.4026654492674087e-16,6.496445028282003e-13,12.187324232118623,down,TRUE

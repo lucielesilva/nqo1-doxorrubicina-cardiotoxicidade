@@ -1,0 +1,13 @@
+Métrica,Valor
+Gene alvo,NQO1
+UniProt,P15559
+Espécie,Homo sapiens (9606)
+Rede STRING — nós,43
+Rede STRING — arestas,221
+Parceiros diretos de NQO1,42
+Score mínimo STRING,700
+Vias KEGG com NQO1,7
+Vias Reactome (baixo nível) com NQO1,3
+NQO1 log2FC (DCM vs CTRL),-1.664
+NQO1 padj,6.50e-13
+NQO1 direção,down
