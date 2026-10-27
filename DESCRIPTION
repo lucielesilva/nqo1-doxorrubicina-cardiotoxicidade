@@ -37,4 +37,8 @@ Suggests:
     sva,
     xCell,
     ggforce,
-    pheatmap
+    pheatmap,
+    ggrepel,
+    magick,
+    httr,
+    jsonlite

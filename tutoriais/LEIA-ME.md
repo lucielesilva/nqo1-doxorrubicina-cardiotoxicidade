@@ -5,45 +5,15 @@ Esta pasta reúne a aula em **etapas numeradas**. O pipeline original
 curtos, cada um com muitos comentários explicando o que está sendo feito e por
 quê.
 
-A regra da pasta é simples: **o número do arquivo é a ordem de execução**.
+A regra da pasta é simples: **o número do arquivo é a ordem de execução dos scripts da aula (00 a 06)**. O `07` é um extra opcional, em R.
 
 ## Conteúdo da pasta
 
 | Arquivo | Tipo |
 |---|---|
 | `00_configuracao_e_dados.R` … `06_batch_deconvolution.R` | scripts da aula (R) |
-| `APRESENTACAO_NQO1_TUTORIAIS.pptx` | apresentação da aula (31 slides, editável) |
-| `montar_apresentacao.py` | script que gera a apresentação a partir dos resultados |
+| `07_PPI_NQO1_string_kegg_reactome.R` | extra em R: rede PPI do NQO1 + vias KEGG/Reactome (opcional) |
 | `LEIA-ME.md` | este arquivo |
-
-## Apresentação
-
-`APRESENTACAO_NQO1_TUTORIAIS.pptx` é a apresentação usada em sala: **51 slides**,
-formato 16:9, com **texto, tabelas e figuras editáveis**, texto alternativo nas
-figuras e notas do apresentador em cada slide. Ela abre normalmente no
-PowerPoint, no LibreOffice Impress e no **Google Apresentações** (basta importar
-o arquivo no Drive).
-
-Blocos da apresentação: objetivos e glossário → contexto clínico (DOX,
-mecanismos, morte celular, NQO1, cardioproteção) → dados e métodos → resultados
-transcriptômicos (UMAP, volcano, NQO1, heatmap) → do gene ao sistema → via e
-robustez → farmacogenômica → conclusões, discussão e referências.
-
-Os slides de mecanismos usam as figuras dos artigos em `tutoriais/artigos/`:
-Kong et al. (2022), Fig. 1 (ciclo redox e estresse oxidativo) e Fig. 2
-(apoptose, piroptose e ferroptose); Rodrigues De Souza et al. (2025), Fig. 1
-(as 25 formas de morte celular regulada) e Fig. 3 (modelo de multioptose).
-
-Os números e as figuras dos slides vêm das tabelas em `output/tables/` e das
-imagens em `output/figures/`. Se você rodar a análise de novo e os valores
-mudarem, gere a apresentação outra vez com:
-
-```powershell
-python tutoriais\montar_apresentacao.py
-```
-
-O script lê os CSVs de resultado, recalcula os números e monta os slides (título,
-tópicos, tabelas, figuras, notas e numeração).
 
 ## Ordem dos scripts
 
@@ -56,12 +26,12 @@ tópicos, tabelas, figuras, notas e numeração).
 | `04_rede_PPI.R` | Rede de interações da via AMPK no STRING. | 02 |
 | `05_extras_GSEA_GSVA.R` | GSEA e GSVA da via AMPK. | 02 |
 | `06_batch_deconvolution.R` | Correção de batch com SVA e deconvolução celular com xCell. | 02 |
-| `07_PPI_NQO1_string_kegg_reactome.py` | **Extra em Python:** rede PPI centrada em NQO1 no STRING + vias KEGG/Reactome, com figuras e tabelas. | 02 (para colorir com log2FC) |
+| `07_PPI_NQO1_string_kegg_reactome.R` | **Extra em R (recomendado):** rede PPI centrada em NQO1 no STRING + vias KEGG/Reactome, com figuras e tabelas. | 02 (para colorir com log2FC) |
 | `executar_tutoriais.R` (na raiz) | Runner que executa tudo na ordem correta. | — |
 
-O `07` é um extra opcional em Python (não entra no runner R). Ele gera as
-saídas `output/figures/nqo1_*` e `output/tables/nqo1_*`. A interpretação
-desses resultados está integrada na seção 4 do `RELATORIO_CIENTIFICO.md`.
+O `07` é opcional e não entra no runner R. Ele gera as saídas
+`output/figures/nqo1_*` e `output/tables/nqo1_*`. A interpretação desses
+resultados está integrada na seção 4 do `RELATORIO_CIENTIFICO.md`.
 
 O `03_gene_sets.R` vem antes da rede e do GSEA de propósito: primeiro fica claro
 *quais* genes entraram na análise, depois se interpretam vias e interações.
@@ -92,6 +62,19 @@ cd "C:\Users\oorie\OneDrive\Documentos\TRABALHOS\nqo1-doxorrubicina-cardiotoxici
 
 ```powershell
 & 'C:\Program Files\R\R-4.6.1\bin\Rscript.exe' 'tutoriais\02_volcano.R'
+```
+
+### Análise extra de rede e vias
+
+```powershell
+& 'C:\Program Files\R\R-4.6.1\bin\Rscript.exe' 'tutoriais\07_PPI_NQO1_string_kegg_reactome.R'
+```
+
+Para forçar nova consulta ao STRING, KEGG e Reactome:
+
+```powershell
+$env:NQO1_REFRESH="1"
+& 'C:\Program Files\R\R-4.6.1\bin\Rscript.exe' 'tutoriais\07_PPI_NQO1_string_kegg_reactome.R'
 ```
 
 Cada script de análise carrega o `00` sozinho (`source()`), então não é preciso
@@ -183,13 +166,28 @@ resumir por grupo, testar com Wilcoxon e desenhar o violino com caixa interna.
 - `output/figures/xCell_heatmap.png`
 - `output/figures/xCell_violinos.png`
 
+### `07_PPI_NQO1_string_kegg_reactome.R` (opcional)
+- `output/figures/nqo1_rede_ppi_string.png`
+- `output/figures/nqo1_kegg_pathways.png`
+- `output/figures/nqo1_reactome_pathways.png`
+- `output/figures/nqo1_heatmap_vias_parceiros.png`
+- `output/figures/nqo1_kegg_diagram_hsa05208.png`
+- `output/figures/nqo1_reactome_diagram_nfe2l2.png`
+- `output/tables/nqo1_string_ppi_arestas.csv`
+- `output/tables/nqo1_string_ppi_nos.csv`
+- `output/tables/nqo1_kegg_pathways.csv`
+- `output/tables/nqo1_reactome_pathways.csv`
+- `output/tables/nqo1_reactome_hierarquia.csv`
+- `output/tables/nqo1_resumo_metricas.csv`
+
 ## Dependências
 
 Pacotes do CRAN:
 
 ```r
 install.packages(c("dplyr", "tidyr", "ggplot2", "readr", "igraph",
-                     "ggrepel", "uwot", "ggforce", "pheatmap", "rstudioapi"))
+                     "ggrepel", "uwot", "ggforce", "pheatmap", "rstudioapi",
+                     "httr", "jsonlite", "magick"))
 ```
 
 Pacotes do Bioconductor:

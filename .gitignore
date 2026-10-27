@@ -69,3 +69,8 @@ secrets.yml
 .project
 .classpath
 .settings/
+
+# --- Apresentações / slides ---------------------------------------------
+*.pptx
+*.key
+*.odp

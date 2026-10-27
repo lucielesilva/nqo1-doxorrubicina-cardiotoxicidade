@@ -317,15 +317,18 @@ O heatmap mostra, para cada parceiro de NQO1, em quais vias KEGG (bloco à esque
 
 ### 4.5 Reprodutibilidade
 
+A análise pode ser refeita em R:
+
 ```bash
-python tutoriais/07_PPI_NQO1_string_kegg_reactome.py
+Rscript tutoriais/07_PPI_NQO1_string_kegg_reactome.R
 ```
 
 Para forçar a atualização dos dados baixados:
 
 ```bash
-NQO1_REFRESH=1 python tutoriais/07_PPI_NQO1_string_kegg_reactome.py
+NQO1_REFRESH=1 Rscript tutoriais/07_PPI_NQO1_string_kegg_reactome.R
 ```
+
 
 Os dados brutos ficam em `output/temp/nqo1_ppi_multidb/`. As figuras e tabelas são gravadas em `output/figures/` e `output/tables/`. O script gera apenas as saídas técnicas; a interpretação está integrada neste relatório.
 
@@ -468,33 +471,6 @@ Dados: estrutura do NQO1 (PDB 1D4A, 2F1O ou 1QBG) e doxorrubicina (PubChem CID 3
 
 Método: docking molecular com AutoDock Vina, leitura da energia de ligação em kcal/mol e visualização no PyMOL.
 
-Código base em Python:
-
-```bash
-conda create -n docking -c conda-forge autodock-vina openbabel pymol-open-source -y
-conda activate docking
-```
-
-```python
-import subprocess
-
-# 1) Baixar o receptor (por exemplo, 1D4A) e remover agua e ligantes,
-#    mantendo a proteína. Adicionar hidrogenios.
-# 2) Converter o ligante para PDBQT e protonar em pH fisiológico.
-subprocess.run(["obabel", "doxorubicin.sdf", "-O", "doxorubicin.pdbqt",
-                "--gen3d", "-p", "7.4"])
-
-# 3) Definir a caixa de docking no sitio ativo da NQO1, usando as
-#    coordenadas do cofator FAD como referência.
-subprocess.run([
-    "vina", "--receptor", "nqo1_receptor.pdbqt",
-    "--ligand", "doxorubicin.pdbqt",
-    "--center_x", "10", "--center_y", "20", "--center_z", "30",  # ajustar
-    "--size_x", "25", "--size_y", "25", "--size_z", "25",
-    "--exhaustiveness", "32", "--num_modes", "9",
-    "--out", "doxo_nqo1.pdbqt"
-])
-```
 
 Critério: afinidade de ligação menor ou igual a -7 kcal/mol sugere interação plausível, a ser confirmada por inspeção visual no PyMOL.
 
@@ -506,23 +482,6 @@ Dados: GTEx Portal (eQTL), PharmGKB e dbSNP.
 
 Método: consulta de eQTL e anotação farmacogenética.
 
-Código base em Python:
-
-```python
-import requests
-
-url = "https://gtexportal.org/api/v2/association/singleTissueEqtl"
-params = {
-    "gencodeId": "ENSG00000181019",           # NQO1
-    "tissueSiteDetailId": "Heart_Left_Ventricle",
-    "datasetId": "gtex_v8"
-}
-r = requests.get(url, params=params)
-dados = r.json()
-
-snp = [x for x in dados["data"] if x.get("snpId") == "rs1800566"]
-print(snp)
-```
 
 Critério: verificar se o rs1800566 e um eQTL do NQO1 (beta e valor de p) e registrar a direção do efeito descrita no PharmGKB.
 
@@ -589,24 +548,6 @@ Dados: assinaturas LINCS L1000 e rotulos de cardiotoxicidade da literatura e do 
 
 Método: Random Forest e importância de variáveis por SHAP.
 
-Código base em Python:
-
-```python
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-import shap
-
-X = pd.read_csv("l1000_signatures.csv")
-y = pd.read_csv("labels.csv")["cardiotoxic"]
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
-model = RandomForestClassifier(n_estimators=500, random_state=42).fit(X_train, y_train)
-
-explainer = shap.TreeExplainer(model)
-shap_values = explainer.shap_values(X_test)
-shap.summary_plot(shap_values, X_test)
-```
 
 Critério: AUC maior que 0,8 em validação cruzada e identificação dos genes mais relevantes por SHAP.
 

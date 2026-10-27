@@ -120,11 +120,6 @@ A ligação entre doxorrubicina e NQO1 vem de bancos de assinatura farmacológic
 
 <p align="center"><em>Figura 4. Rede PPI da via AMPK (STRING) e associações PubChem por gene.</em></p>
 
-### Deconvolução celular
-
-<p align="center">
-  <img src="output/figures/xCell_violinos.png" alt="Violinos dos escores xCell por grupo" width="90%">
-</p>
 
 <p align="center"><em>Figura 5. Escores xCell por tipo celular. O violino mostra a distribuição; a caixa interna marca mediana e quartis. A ICM entra como contexto, mas os testes comparam DCM com controle.</em></p>
 
@@ -154,7 +149,8 @@ A ligação entre doxorrubicina e NQO1 vem de bancos de assinatura farmacológic
 
 ```r
 install.packages(c("dplyr", "ggplot2", "stringr", "openxlsx", "igraph",
-                   "tidyr", "data.table", "readr", "yaml", "pheatmap"))
+                   "tidyr", "data.table", "readr", "yaml", "pheatmap",
+                   "httr", "jsonlite", "ggrepel", "magick"))
 
 if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
 BiocManager::install(c("limma", "edgeR", "GSVA", "fgsea", "GEOquery", "sva"))
@@ -186,7 +182,20 @@ No Windows, use o caminho completo do Rscript se ele não estiver no PATH:
 Rscript executar_tutoriais.R
 ```
 
-Os scripts em `tutoriais/` vão do preparo dos dados (00) até SVA e xCell (06). A ordem é a mesma da numeração.
+Os scripts em `tutoriais/` vão do preparo dos dados (00) até SVA e xCell (06). O script 07 é opcional e faz a análise de rede e vias.
+
+### Análise de rede e vias (opcional)
+
+```powershell
+Rscript tutoriais/07_PPI_NQO1_string_kegg_reactome.R
+```
+
+Para forçar uma nova consulta ao STRING, KEGG e Reactome:
+
+```powershell
+$env:NQO1_REFRESH="1"; Rscript tutoriais/07_PPI_NQO1_string_kegg_reactome.R
+```
+
 
 ### Relatório de controle de qualidade
 
@@ -213,7 +222,6 @@ nqo1-doxorrubicina-cardiotoxicidade/
 ├── executar_tutoriais.R                    # Executa os scripts 01 a 06
 ├── config.yaml                             # Limiares e parâmetros
 ├── DESCRIPTION
-├── requirements.txt
 │
 ├── tutoriais/
 │   ├── 00_configuracao_e_dados.R
@@ -223,6 +231,7 @@ nqo1-doxorrubicina-cardiotoxicidade/
 │   ├── 04_rede_PPI.R
 │   ├── 05_extras_GSEA_GSVA.R
 │   ├── 06_batch_deconvolution.R
+│   ├── 07_PPI_NQO1_string_kegg_reactome.R   # Rede NQO1 + KEGG/Reactome (opcional)
 │   └── LEIA-ME.md
 │
 ├── reports/
@@ -310,7 +319,6 @@ Esses limites estão discutidos com mais detalhe no [`RELATORIO_CIENTIFICO.md`](
 - **Gajjar et al. (2026)**: estratificação de risco cardiovascular e vigilância em cardio-oncologia.
 - **Rodrigues De Souza et al. (2025)**: modelo integrado de multioptose para alvos terapêuticos.
 
-Os artigos usados na introdução estão em `tutoriais/artigos/`.
 
 ---
 
